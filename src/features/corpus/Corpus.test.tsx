@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AxiosError } from 'axios';
 import { Corpus } from './Corpus';
 import { loadCatalog, loadDetail } from './client';
@@ -19,9 +19,17 @@ async function select(id = 'synthetic-1') {
 }
 beforeEach(() => {
   vi.resetAllMocks();
+  // jsdom has no media-query implementation; exercise real component hooks with a static browser preference.
+  vi.stubGlobal('matchMedia', vi.fn((query: string) => ({
+    matches: false, media: query, onchange: null,
+    addListener: vi.fn(), removeListener: vi.fn(),
+    addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn(() => true),
+  })));
   catalogRequest.mockResolvedValue(syntheticCatalog());
   detailRequest.mockImplementation(async (id) => syntheticDetail(id));
 });
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe('Corpus screen', () => {
   it('announces loading before showing an ordered, complete catalog and version', async () => {
@@ -29,12 +37,41 @@ describe('Corpus screen', () => {
     catalogRequest.mockReturnValue(request.promise);
     render(<Corpus />);
     expect(screen.getByRole('status')).toHaveTextContent('Loading corpus');
+    expect(screen.getByRole('status')).toHaveAttribute('data-slot', 'alert');
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
     await act(async () => { request.resolve(syntheticCatalog()); });
     expect(screen.getByText('synthetic-v1')).toBeVisible();
     const options = screen.getAllByRole('option');
     expect(options.slice(1).map((option) => option.getAttribute('value'))).toEqual(syntheticCatalog().papers.map((paper) => paper.id));
     expect(detailRequest).not.toHaveBeenCalled();
+  });
+  it('renders the reader with Cojeev primitives while retaining the native selection contract', async () => {
+    const { container } = render(<Corpus />);
+    const selection = await screen.findByRole('combobox', { name: 'Paper' });
+    selection.focus();
+    expect(selection).toHaveFocus();
+    expect(selection.tagName).toBe('SELECT');
+    expect(selection).toHaveAttribute('data-slot', 'native-select');
+    expect(screen.getByRole('option', { name: 'Choose a paper' })).toHaveAttribute('data-slot', 'native-select-option');
+    expect(screen.getAllByRole('option')).toHaveLength(21);
+    expect(screen.getByText(/Corpus ready/)).toHaveAttribute('data-slot', 'badge');
+    await select();
+    const abstract = await screen.findByTestId('original-abstract');
+    expect(abstract.closest('[data-slot="card-content"]')).not.toBeNull();
+    expect(selection).toHaveFocus();
+    expect(container.querySelector('svg.v-morph')).toBeNull();
+    expect(screen.getByRole('heading', { name: syntheticDetail().title }).closest('[data-slot="card"]')).not.toBeNull();
+    await select('');
+    expect(selection).toHaveValue('');
+    expect(screen.queryByTestId('original-abstract')).not.toBeInTheDocument();
+  });
+  it('uses an inline Cojeev alert for sanitized failure, not a dismissible notification', async () => {
+    catalogRequest.mockRejectedValue(new Error('/private/path secret'));
+    render(<Corpus />);
+    expect(await screen.findByRole('alert')).toHaveAttribute('data-slot', 'alert');
+    expect(screen.getByRole('alert')).toHaveTextContent('Could not load corpus');
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByText(/private\/path/)).not.toBeInTheDocument();
   });
   it('shows authors, exact original text and hash without interpreting HTML', async () => {
     const { container } = render(<Corpus />);
@@ -44,6 +81,8 @@ describe('Corpus screen', () => {
     expect(container.querySelector('script')).toBeNull();
     expect(screen.getByText('a'.repeat(64))).toBeVisible();
     expect(screen.getByText('Synthetic Author')).toBeVisible();
+    expect(screen.getByRole('article').querySelector('p')).toHaveTextContent('Synthetic Author');
+    expect(screen.getByRole('heading', { name: syntheticDetail().title, level: 3 })).toHaveAttribute('id', 'paper-title');
   });
   it('shows actual capability states as information, never analysis buttons', async () => {
     const data = syntheticCatalog();

@@ -1,14 +1,95 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@import "./styles/cojeev-fonts.css";
+@import "./styles/cojeev/tokens.css";
+@import "./styles/cojeev/theme.css";
+@import "./styles/cojeev/base.css";
+@import "./styles/cojeev/morph.css";
+@import "./styles/cojeev/native-select.css";
+@import "./styles/cojeev/control-appearance.css";
+@import "./styles/cojeev/card.css";
+@import "./styles/cojeev/badge.css";
+@import "./styles/cojeev/alert.css";
+
+/* Only application source participates in utility detection, never acquisition scratch. */
+@source "./";
 
 :root {
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  color-scheme: light;
+  --fs-body: 16px;
+  --fs-control: 16px;
+  --fs-small: 14px;
+  --lh-body: 1.6;
   font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
 }
 
-body {
-  margin: 0;
-  min-width: 20rem;
+body { min-width: 20rem; }
+.workspace { min-height: 100dvh; display: flex; flex-direction: column; }
+.workspace-header, .workspace-main, .workspace-footer {
+  width: min(100%, 64rem);
+  margin-inline: auto;
+  padding-inline: clamp(var(--s-4), 4vw, var(--s-10));
+}
+.workspace-header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding-block: var(--s-8);
+}
+.workspace-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--ctl-lg);
+  height: var(--ctl-lg);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: var(--r-md);
+  font-family: var(--font-display);
+  font-size: var(--fs-section);
+  font-weight: var(--fw-semibold);
+}
+.workspace-header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 4vw, 34px);
+  font-weight: var(--fw-semibold);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.workspace-header p, .workspace-notice, .corpus-muted, .corpus-version, .corpus-empty {
+  color: var(--muted-foreground);
+}
+.workspace-header p, .workspace-notice { font-size: var(--fs-small); }
+.workspace-main { flex: 1; padding-bottom: var(--s-12); }
+.workspace-notice { margin-bottom: var(--s-6); }
+.workspace-footer { padding-bottom: var(--s-8); color: var(--muted-foreground); font-size: var(--fs-meta); }
+.workspace-footer nav { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); margin-top: var(--s-2); }
+.workspace-footer a { display: inline-flex; align-items: center; min-height: var(--ctl-lg); }
+.corpus { display: grid; gap: var(--s-6); min-width: 0; }
+.corpus-intro { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2) var(--s-4); }
+.corpus h2 { font-family: var(--font-display); font-size: var(--fs-section); font-weight: var(--fw-semibold); }
+.corpus-intro p, .corpus-version { font-size: var(--fs-small); }
+.corpus-catalog { display: grid; justify-items: start; gap: var(--s-2); }
+.corpus-version { max-width: 80ch; overflow-wrap: anywhere; }
+.corpus-selection { display: grid; gap: var(--s-2); min-width: 0; }
+.corpus-selection label { font-weight: var(--fw-semibold); }
+.corpus-empty { padding-block: var(--s-6); border-block: 1px solid var(--border); }
+.corpus-paper { min-width: 0; }
+.corpus-paper-heading { display: grid; gap: var(--s-3); min-width: 0; max-width: 72ch; }
+.corpus-paper [data-slot="card-title"] { font-family: var(--font-display); font-size: var(--fs-title); line-height: 1.35; }
+.corpus-paper h4 { font-weight: var(--fw-semibold); font-size: var(--fs-body); }
+.corpus-abstract { max-width: 72ch; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.75; }
+.corpus-hash { max-width: 80ch; overflow-wrap: anywhere; color: var(--muted-foreground); font-size: var(--fs-small); }
+.corpus-feedback { min-width: 0; }
+.corpus-capabilities { display: grid; gap: var(--s-4); padding-top: var(--s-6); border-top: 1px solid var(--border); }
+.corpus-capabilities h3 { font-family: var(--font-display); font-size: var(--fs-title); font-weight: var(--fw-semibold); }
+.corpus-capabilities > p { max-width: 72ch; font-size: var(--fs-small); }
+.corpus-capability-list { display: grid; gap: var(--s-5) var(--s-8); }
+.corpus-capability-list > div { min-width: 0; }
+.corpus-capability-list dt { font-weight: var(--fw-medium); overflow-wrap: anywhere; }
+.corpus-capability-list dd { margin: 0; color: var(--muted-foreground); font-size: var(--fs-small); overflow-wrap: anywhere; }
+@media (min-width: 40rem) {
+  .workspace-header { padding-block: var(--s-10); }
+  .corpus-capability-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace *, .workspace *::before, .workspace *::after { animation: none; transition: none; scroll-behavior: auto; }
 }

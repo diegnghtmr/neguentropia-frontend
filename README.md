@@ -40,6 +40,22 @@ Scripts:
 | `npm run build` | Typecheck y build Vite en `dist/` |
 | `npm run preview` | Inspección local del build; no producción |
 
+## Componentes del lector
+
+El lector renderiza NativeSelect, Card, Badge y Alert auténticos de Cojeev UI; no usa sus ejemplos de documentación como reemplazo. La selección continúa siendo un `select` nativo con reset y veinte opciones en orden del catálogo. Las capacidades no son acciones. El título/autores, abstract original, hash y versión conservan sus contratos de datos y cancelación; un error o cambio de selección no presenta el éxito anterior como vigente.
+
+Los componentes y su soporte transitivo permanecen en `src/features/corpus/{ui,lib}/`; el tema y las fuentes son globales. `@/` apunta a `src/` en Vite, TypeScript y Vitest. La aplicación mantiene sus flags TypeScript estrictos, incluidos exactOptionalPropertyTypes/noUncheckedIndexedAccess/noUnused. `components.json` registra el namespace oficial; los targets explícitos upstream necesitan inspección antes de futuras incorporaciones, porque el CLI no siempre reubica soporte según los aliases.
+
+`index.html` fija `data-mode="light"` en el elemento HTML real; se conservan los tokens dark sin añadir un selector de tema especulativo. El lector usa `data-motion="off"`, foco visible, fuentes locales y una medida de texto de 72ch. Las licencias de Cojeev y ambas fuentes están disponibles desde el footer y se incorporan como assets del build. Véase [procedencia, licencias y adaptaciones](THIRD_PARTY_NOTICES.md).
+
+Las WOFF2 se obtuvieron del par embebido del registro usando su materializador inspeccionado, sin red. Para verificar una copia ya materializada, dentro del contenedor:
+
+```sh
+node src/scripts/cojeev-materialize-fonts.mjs --css src/styles/cojeev-fonts.css
+```
+
+El helper verifica los dos hashes y rechaza estados parciales o alterados; no descarga fuentes. No ejecutar scripts copiados nuevos sin inspección. Los tests de jsdom no acreditan teclado nativo, layout a 320px ni contraste visual: la aceptación en navegador debe comprobar esas condiciones por separado.
+
 ## Desarrollo local
 
 Después de instalar:

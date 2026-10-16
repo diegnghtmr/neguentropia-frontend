@@ -1,0 +1,101 @@
+@layer cojeev-states {
+/* Descendant paint and explicit dark overrides from alive.css. */
+[data-slot="badge"] > * {
+  line-height: 1;
+}
+.v-badge[data-slot].-caps {
+  height: 26px;
+  padding: 0 var(--s-3);
+  font-size: var(--fs-caps);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+[data-slot="badge"] .v-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+  margin: 0;
+  background: currentColor;
+}
+[data-slot="badge"]:is(.-live, .-pending) .v-dot {
+  background: var(--v-olive);
+}
+:root[data-mode="dark"]
+  [data-slot="badge"]:is(
+    .-pink-soft,
+    .-yellow-soft,
+    .-olive-soft,
+    .-blue-soft
+  ) {
+  color: var(--v-text);
+  background: color-mix(in oklab, var(--badge-tint) 20%, var(--v-canvas));
+}
+:root[data-mode="dark"] [data-slot="badge"].-pink-soft {
+  --badge-tint: var(--v-pink);
+}
+:root[data-mode="dark"] [data-slot="badge"].-yellow-soft {
+  --badge-tint: var(--v-yellow);
+}
+:root[data-mode="dark"] [data-slot="badge"].-olive-soft {
+  --badge-tint: var(--v-olive);
+}
+:root[data-mode="dark"] [data-slot="badge"].-blue-soft {
+  --badge-tint: var(--v-blue);
+}
+:root[data-mode="dark"] [data-slot="badge"]:is(.-dashed, .-test, .-live) {
+  background: var(--v-beige-2);
+}
+/* The moving SVG owns this edge; a painted DOM edge would double it. */
+[data-slot="badge"]:is(.-dashed, .-test).v-morph-live {
+  border-color: transparent;
+}
+
+/* Shape and paint are independent of the status/tone axis. The SVG owns both. */
+.v-badge[data-appearance] {
+  --mfill: var(--badge-face);
+  --mstroke: currentColor;
+  position: relative;
+  isolation: isolate;
+  border: 0;
+  border-radius: var(--v-control-radius, 8px);
+  box-shadow: none;
+}
+.v-badge[data-appearance="stamp"] {
+  letter-spacing: 0.045em;
+}
+.v-badge[data-appearance="tag"] {
+  border-radius: var(--v-control-radius, 4px 12px 12px 4px);
+}
+.v-badge[data-appearance="tag"]::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  flex: none;
+  opacity: 0.6;
+}
+.v-badge[data-appearance="counter"] {
+  border-radius: var(--v-control-radius, 50%);
+  min-width: var(--badge-count-size, 28px);
+  font-variant-numeric: tabular-nums;
+}
+.v-badge[data-appearance].v-morph-live {
+  background: transparent;
+}
+:root[data-mode="dark"]
+  .v-badge[data-appearance]:is(
+    .-pink-soft,
+    .-yellow-soft,
+    .-olive-soft,
+    .-blue-soft
+  ) {
+  --mfill: color-mix(in oklab, var(--badge-tint) 20%, var(--v-canvas));
+}
+:root[data-mode="dark"] .v-badge[data-appearance]:is(.-dashed, .-test, .-live) {
+  --mfill: var(--v-beige-2);
+}
+
+}
