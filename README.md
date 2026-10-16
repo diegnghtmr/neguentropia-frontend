@@ -1,13 +1,13 @@
 # Neguentropía — frontend
 
-Base local de una SPA React 19, Vite 8, TypeScript estricto y Tailwind CSS 4. La pantalla inicial informa que la preparación del corpus está pendiente; no carga artículos, llama al backend ni presenta resultados de algoritmos. Axios y Zod quedan disponibles para la posterior integración HTTP explícita.
+SPA local React 19, Vite 8, TypeScript estricto y Tailwind CSS 4. La pantalla de corpus consulta el catálogo y el abstract seleccionado mediante Axios, valida las respuestas con Zod y muestra las capacidades reales del backend. No ejecuta análisis ni calcula frecuencias o algoritmos en JavaScript.
 
 ## Requisitos y alcance
 
 - Docker operativo. Node, npm, instalación, pruebas, compilación y aplicación se ejecutan dentro de contenedores; no instalar Node en el anfitrión.
 - Node 24 y npm 11. El lockfile fija el árbol instalado; usar `npm ci`.
 - No se incluyen corpus, modelos, credenciales, resultados ni instrucciones privadas en esta entrega.
-- Los algoritmos se implementan en Java. Esta base no acredita integración HTTP, CORS, corpus verificado, inferencia ni despliegue.
+- Los algoritmos se implementan en Java. Las pruebas sintéticas de esta unidad no acreditan integración real, revisión del corpus, CORS, inferencia, despliegue ni cierre de la fase de bases.
 
 Ejecutar los comandos desde la carpeta `frontend/`, que es también el único contexto Docker de la aplicación.
 
@@ -35,7 +35,7 @@ Scripts:
 | --- | --- |
 | `npm run dev` | Vite en `0.0.0.0`; desarrollo, no servidor de producción |
 | `npm test` | Suite Vitest finita, sin modo watch |
-| `npm test -- src/app/App.test.tsx` | Prueba enfocada del shell |
+| `npm test -- src/features/corpus src/app/App.test.tsx` | Pruebas enfocadas de schemas, cliente, corpus y shell |
 | `npm run typecheck` | TypeScript sin emitir archivos |
 | `npm run build` | Typecheck y build Vite en `dist/` |
 | `npm run preview` | Inspección local del build; no producción |
@@ -52,21 +52,24 @@ docker run --rm -it --user "$(id -u):$(id -g)" --env HOME=/tmp \
   npm run dev -- --port 5173 --strictPort
 ```
 
-Abrir `http://127.0.0.1:5173`. Esta unidad no necesita URL de API, proxy ni configuración CORS. No colocar claves en variables `VITE_*`: se incorporan al JavaScript servido al navegador. La conexión al backend se configurará y comprobará en una unidad posterior.
+Abrir `http://127.0.0.1:5173`. Sin configuración, el cliente consulta `/api/papers` y `/api/papers/{id}` en el mismo origen. Si no existe backend allí, muestra un error: no usa fixtures ni datos de respaldo.
+
+Para un backend en otro origen, pasar `--env VITE_API_BASE_URL=http://127.0.0.1:8081` al contenedor de desarrollo. Esta variable opcional contiene solo la URL pública base del backend, sin el sufijo `/api`; el cliente añade ese sufijo. Nunca colocar claves en `VITE_*`: sus valores se incorporan al JavaScript servido. El backend debe permitir explícitamente el origen frontend mediante su configuración CORS. No se añade proxy ni servicio intermedio.
 
 ## Imagen de producción local
 
 ```sh
-docker build --file Dockerfile.vercel --tag neguentropia-frontend:local .
-docker run --rm -p 127.0.0.1:4173:80 neguentropia-frontend:local
+docker build --file Dockerfile.vercel --tag neguentropia-frontend:local \
+  --build-arg VITE_API_BASE_URL=http://127.0.0.1:8081 .
+docker run --rm -p 127.0.0.1:4174:80 neguentropia-frontend:local
 ```
 
-Abrir `http://127.0.0.1:4173`. La imagen multietapa usa Node para compilar y Nginx para servir solamente el resultado estático. Las bases están fijadas por digest. No copia `node_modules`, fuentes de desarrollo, notas o secretos a la imagen final.
+Abrir `http://127.0.0.1:4174`; configurar en el backend el origen permitido exacto `http://127.0.0.1:4174`. Omitir el ARG conserva las peticiones relativas `/api`. La URL se fija al compilar: cambiar una variable del contenedor Nginx no reconfigura el bundle. La imagen multietapa usa Node para compilar y Nginx para servir solamente el resultado estático. Las bases están fijadas por digest. No copia `node_modules`, fuentes de desarrollo, notas o secretos a la imagen final.
 
 `PORT` configura el puerto interno de Nginx al arrancar; su valor predeterminado es `80`. La publicación de puertos debe coincidir:
 
 ```sh
-docker run --rm --env PORT=8080 -p 127.0.0.1:4173:8080 neguentropia-frontend:local
+docker run --rm --env PORT=8080 -p 127.0.0.1:4174:8080 neguentropia-frontend:local
 ```
 
 Nginx sustituye solo `PORT` en su plantilla; conserva `$uri` para resolver archivos. Las rutas profundas devuelven la SPA; los assets inexistentes responden 404, no el HTML de la aplicación. Los bundles con hash tienen caché immutable y el documento HTML usa no-cache. Un puerto inválido hace fallar la configuración Nginx; no hay fallback a otro servidor.
@@ -77,7 +80,7 @@ En una terminal, iniciar la imagen local. En otra, comprobar raíz, MIME/conteni
 
 ```sh
 docker run --rm --network=host \
-  --env FRONTEND_ORIGIN=http://127.0.0.1:4173 \
+  --env FRONTEND_ORIGIN=http://127.0.0.1:4174 \
   --mount "type=bind,src=$PWD/scripts/check-container.mjs,dst=/checks/check-container.mjs,readonly" \
   node:24-bookworm-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 \
   node --test /checks/check-container.mjs
@@ -87,14 +90,20 @@ docker run --rm --network=host \
 
 ## Estructura y siguientes unidades
 
-- `src/app/`: composición del shell y su prueba.
+- `src/app/`: composición del shell accesible y su prueba.
+- `src/features/corpus/`: catálogo, lectura del original, schemas y pruebas sintéticas.
+- `src/infrastructure/api/`: instancia Axios y URL pública de backend.
 - `src/main.tsx`: arranque React.
 - `src/styles.css`: estilos y Tailwind 4.
 - `src/test/`: preparación del runner.
 - `nginx/`: plantilla de servidor estático.
 - `scripts/check-container.mjs`: comprobación HTTP de la imagen ya iniciada.
 
-No se crean features vacías, librerías de gráficas sin uso ni un framework genérico. Los módulos de corpus, ranking, similitud, agrupamiento y búsqueda llegarán en unidades posteriores, con validación del contrato y pruebas.
+El catálogo solo se muestra si contiene exactamente 20 IDs únicos, seis métodos soportados únicos y disponibilidades coherentes. El detalle debe coincidir en ID y versión del corpus; el texto original se conserva y renderiza como texto, nunca HTML. Cambiar o borrar la selección descarta el detalle anterior y aborta su petición; respuestas obsoletas no actualizan la pantalla. Los errores se muestran sin detalles privados ni datos anteriores como éxito vigente. Las capacidades son informativas, incluso cuando el backend declara alguna disponible.
+
+Las pruebas usan exclusivamente 20 registros sintéticos nuevos por caso y red simulada; no contienen abstracts reales. Cubren invariantes, errores, carga, selección, respuestas fuera de orden y regresiones del shell (marca, landmark principal y ausencia de análisis). El health y la preparación son responsabilidad del backend: esta pantalla no inventa su estado desde liveness.
+
+No se crean features vacías, librerías de gráficas sin uso ni un framework genérico. Ranking, similitud, agrupamiento y búsqueda siguen fuera de esta unidad. Quedan pendientes la integración con el manifiesto privado montado readonly, HTTP/CORS reales, construcción de imágenes y revisión en navegador a cargo del coordinador.
 
 ## Alojamiento pendiente
 

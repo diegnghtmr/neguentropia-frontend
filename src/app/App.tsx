@@ -1,3 +1,5 @@
+import { Corpus } from '../features/corpus';
+
 export default function App() {
   return (
     <div className="flex min-h-dvh flex-col bg-slate-50 text-slate-900">
@@ -12,18 +14,8 @@ export default function App() {
       </header>
 
       <main aria-label="Workspace" className="mx-auto w-full max-w-5xl flex-1 px-6 pb-12">
-        <section aria-labelledby="workspace-status" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Application foundation</p>
-          <h2 id="workspace-status" className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">
-            Workspace status
-          </h2>
-          <p className="mt-6 text-lg font-medium">Corpus preparation is pending.</p>
-          <p className="mt-2 text-slate-600">No analysis has been run.</p>
-          <p className="mt-8 max-w-xl border-t border-slate-100 pt-6 text-sm leading-6 text-slate-600">
-            Algorithms and visualizations will be added module by module.
-            This foundation does not load article data or contact analysis services.
-          </p>
-        </section>
+        <p className="mb-6 text-slate-600">No analysis has been run.</p>
+        <Corpus />
       </main>
 
       <footer className="mx-auto w-full max-w-5xl px-6 pb-8 text-xs text-slate-500">
