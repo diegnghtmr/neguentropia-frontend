@@ -57,21 +57,27 @@ export function Corpus() {
       {catalog.state === 'loading' && <ReaderFeedback message="Loading corpus…" />}
       {catalog.state === 'error' && <ReaderFeedback error message={catalog.message} />}
       {catalog.state === 'ready' && <>
-        <div className="corpus-catalog">
-          <Badge variant="olive">Corpus ready · {catalog.data.papers.length} papers</Badge>
-          <p className="corpus-version">Corpus version: <span>{catalog.data.corpusVersion}</span></p>
+        <div className="corpus-layout">
+          <Card variant="blue" className="corpus-catalog">
+            <Badge variant="olive">Corpus ready · {catalog.data.papers.length} papers</Badge>
+            <div className="corpus-selection">
+              <label htmlFor="paper-selection">Paper</label>
+              <NativeSelect id="paper-selection" value={selectedId} onChange={(event) => setSelectedId(event.target.value)} radius="soft" appearance="contour" className="w-full">
+                <NativeSelectOption value="">Choose a paper</NativeSelectOption>
+                {catalog.data.papers.map((paper) => <NativeSelectOption key={paper.id} value={paper.id}>{paper.title}</NativeSelectOption>)}
+              </NativeSelect>
+            </div>
+            <p className="corpus-version">Corpus version: <span>{catalog.data.corpusVersion}</span></p>
+          </Card>
+          <div className="corpus-reading">
+            {selectedId ? <PaperReader key={`${catalog.data.corpusVersion}:${selectedId}`} id={selectedId} corpusVersion={catalog.data.corpusVersion} /> : <Card variant="cream" className="corpus-empty"><p>Select a paper to read its original abstract.</p></Card>}
+          </div>
         </div>
-        <div className="corpus-selection">
-          <label htmlFor="paper-selection">Paper</label>
-          <NativeSelect id="paper-selection" value={selectedId} onChange={(event) => setSelectedId(event.target.value)} radius="soft" appearance="contour" className="w-full">
-            <NativeSelectOption value="">Choose a paper</NativeSelectOption>
-            {catalog.data.papers.map((paper) => <NativeSelectOption key={paper.id} value={paper.id}>{paper.title}</NativeSelectOption>)}
-          </NativeSelect>
-        </div>
-        {selectedId ? <PaperReader key={`${catalog.data.corpusVersion}:${selectedId}`} id={selectedId} corpusVersion={catalog.data.corpusVersion} /> : <p className="corpus-empty">Select a paper to read its original abstract.</p>}
         <section aria-labelledby="capabilities-heading" className="corpus-capabilities">
-          <h3 id="capabilities-heading">Capabilities</h3>
-          <p className="corpus-muted">Informative backend availability only; this screen does not run analyses or authorize text transfers.</p>
+          <div className="corpus-capabilities-intro">
+            <h3 id="capabilities-heading">Capabilities</h3>
+            <p className="corpus-muted">Informative backend availability only; this screen does not run analyses or authorize text transfers.</p>
+          </div>
           <dl className="corpus-capability-list">
             {(['ranking', 'clustering', 'search'] as const).map((name) => <div key={name}><dt className="capitalize">{name}</dt><dd>{availabilityLabel(catalog.data.capabilities[name])}</dd></div>)}
             {catalog.data.capabilities.similarity.map(({ method, availability }) => <div key={method}><dt>{method}</dt><dd>{availabilityLabel(availability)}</dd></div>)}
@@ -108,7 +114,7 @@ function PaperReader({ id, corpusVersion }: { id: string; corpusVersion: string 
   if (detail.state === 'error') return <ReaderFeedback error message={detail.message} />;
   return (
     <article aria-labelledby="paper-title" className="corpus-paper">
-      <Card>
+      <Card className="corpus-reading-card">
         <CardHeader>
           <div className="corpus-paper-heading">
             <CardTitle id="paper-title">{detail.data.title}</CardTitle>

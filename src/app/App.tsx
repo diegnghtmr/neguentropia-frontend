@@ -8,14 +8,14 @@ export default function App() {
     <div className="workspace">
       <header className="workspace-header">
         <span aria-hidden="true" className="workspace-mark">N</span>
-        <div>
+        <div className="workspace-brand">
           <h1>Neguentropía</h1>
           <p>Text analysis workspace</p>
         </div>
+        <p className="workspace-notice">No analysis has been run.</p>
       </header>
 
       <main aria-label="Workspace" className="workspace-main">
-        <p className="workspace-notice">No analysis has been run.</p>
         <Corpus />
       </main>
 
