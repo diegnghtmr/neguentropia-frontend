@@ -197,8 +197,9 @@ body { min-width: 20rem; }
 .ranking table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: var(--fs-small); }
 .ranking caption { text-align: left; color: var(--muted-foreground); padding-bottom: var(--s-4); }
 .ranking th, .ranking td { text-align: left; padding: var(--s-3) 4px; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
-.ranking th:first-child { width: 20%; }
-.ranking th:last-child { width: 30%; }
+.ranking th { overflow-wrap: normal; }
+.ranking th:first-child { width: 3.5rem; }
+.ranking th:last-child { width: 6.5rem; }
 .ranking td:last-child, .ranking th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 @media (max-width: 24rem) {
   .ranking-summary, .ranking-result { --card-pad: var(--s-4); }
