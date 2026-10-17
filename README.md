@@ -40,6 +40,14 @@ Scripts:
 | `npm run build` | Typecheck y build Vite en `dist/` |
 | `npm run preview` | Inspección local del build; no producción |
 
+## Ranking view
+
+Use the Corpus and Ranking tabs (arrow keys, Home/End, or native button activation) to switch views. The corpus reader keeps its selection. Ranking runs only when **Run ranking** is pressed and POSTs `{}` to `/api/ranking` through the shared Axios client. A strict Zod boundary validates the corpus, preprocessing, parameters and three ordered results before rendering.
+
+Each method has a top-15 table (or all available terms when fewer than 15 exist), preserving Java's term order, ties and frequencies exactly. Run details identify the corpus version, fixed 20-abstract scope, sizes, Radix base and Bucket parameters. Durations are Java single-run sorting times in **ms**, not benchmarks, HTTP latency or browser render times. Tables use the existing Cojeev visual language without adding chart dependencies.
+
+Loading prevents duplicate submissions. Failures clear prior results and show fixed, sanitized messages for invalid requests, unavailable service, server/network errors or incompatible responses. Leaving Ranking aborts its pending request and discards its result; cancellation does not guarantee stopping Java work. Tests use synthetic fixtures and mocked HTTP only; browser layout and real backend acceptance are separate checks.
+
 ## Componentes del lector
 
 El lector renderiza NativeSelect, Card, Badge y Alert auténticos de Cojeev UI; no usa sus ejemplos de documentación como reemplazo. La selección continúa siendo un `select` nativo con reset y veinte opciones en orden del catálogo. Las capacidades no son acciones. El título/autores, abstract original, hash y versión conservan sus contratos de datos y cancelación; un error o cambio de selección no presenta el éxito anterior como vigente.
@@ -108,6 +116,7 @@ docker run --rm --network=host \
 
 - `src/app/`: composición del shell accesible y su prueba.
 - `src/features/corpus/`: catálogo, lectura del original, schemas y pruebas sintéticas.
+- `src/features/ranking/`: explicit ranking action, validated HTTP boundary, three tables and synthetic tests.
 - `src/infrastructure/api/`: instancia Axios y URL pública de backend.
 - `src/main.tsx`: arranque React.
 - `src/styles.css`: estilos y Tailwind 4.
@@ -117,9 +126,9 @@ docker run --rm --network=host \
 
 El catálogo solo se muestra si contiene exactamente 20 IDs únicos, seis métodos soportados únicos y disponibilidades coherentes. El detalle debe coincidir en ID y versión del corpus; el texto original se conserva y renderiza como texto, nunca HTML. Cambiar o borrar la selección descarta el detalle anterior y aborta su petición; respuestas obsoletas no actualizan la pantalla. Los errores se muestran sin detalles privados ni datos anteriores como éxito vigente. Las capacidades son informativas, incluso cuando el backend declara alguna disponible.
 
-Las pruebas usan exclusivamente 20 registros sintéticos nuevos por caso y red simulada; no contienen abstracts reales. Cubren invariantes, errores, carga, selección, respuestas fuera de orden y regresiones del shell (marca, landmark principal y ausencia de análisis). El health y la preparación son responsabilidad del backend: esta pantalla no inventa su estado desde liveness.
+Las pruebas usan exclusivamente 20 registros sintéticos nuevos por caso y red simulada; no contienen abstracts reales. Cubren invariantes, errores, carga, selección, respuestas fuera de orden y regresiones del shell (marca, landmark principal y navegación explícita). El health y la preparación son responsabilidad del backend: esta pantalla no inventa su estado desde liveness.
 
-No se crean features vacías, librerías de gráficas sin uso ni un framework genérico. Ranking, similitud, agrupamiento y búsqueda siguen fuera de esta unidad. Quedan pendientes la integración con el manifiesto privado montado readonly, HTTP/CORS reales, construcción de imágenes y revisión en navegador a cargo del coordinador.
+No se crean features vacías, librerías de gráficas sin uso ni un framework genérico. Similitud, agrupamiento y búsqueda siguen fuera de esta unidad. Quedan pendientes la integración con el manifiesto privado montado readonly, HTTP/CORS reales, construcción de imágenes y revisión en navegador a cargo del coordinador.
 
 ## Alojamiento pendiente
 

@@ -167,6 +167,42 @@ body { min-width: 20rem; }
   .corpus-capabilities { margin-top: var(--s-4); }
   .corpus-capability-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+.workspace-tabs { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-8); }
+.workspace-tabs button, .workspace-action {
+  min-height: var(--ctl-lg);
+  padding: var(--s-2) var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+}
+.workspace-tabs button[aria-selected="true"], .workspace-action {
+  background: var(--v-blue);
+  color: var(--v-on-accent);
+  border-color: var(--v-blue-deep);
+}
+.workspace-tabs button:focus-visible, .workspace-action:focus-visible, [role="tabpanel"]:focus-visible {
+  outline: 3px solid var(--foreground);
+  outline-offset: 4px;
+}
+.workspace-action:disabled { cursor: wait; opacity: .65; }
+[role="tabpanel"][hidden] { display: none; }
+.ranking-controls p { font-size: var(--fs-small); max-width: 60ch; }
+.ranking-output { display: grid; gap: var(--s-6); min-width: 0; }
+.ranking-summary, .ranking-result { border: 1px solid var(--border); min-width: 0; }
+.ranking-metadata { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: var(--s-4); }
+.ranking-metadata dt { font-weight: var(--fw-semibold); }
+.ranking-metadata dd { overflow-wrap: anywhere; margin: 0; }
+.ranking-summary .corpus-muted { margin-top: var(--s-5); font-size: var(--fs-small); max-width: 72ch; }
+.ranking table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: var(--fs-small); }
+.ranking caption { text-align: left; color: var(--muted-foreground); padding-bottom: var(--s-4); }
+.ranking th, .ranking td { text-align: left; padding: var(--s-3) 4px; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.ranking th:first-child { width: 20%; }
+.ranking th:last-child { width: 30%; }
+.ranking td:last-child, .ranking th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 24rem) {
+  .ranking-summary, .ranking-result { --card-pad: var(--s-4); }
+}
 @media (prefers-reduced-motion: reduce) {
   .workspace *, .workspace *::before, .workspace *::after { animation: none; transition: none; scroll-behavior: auto; }
 }
