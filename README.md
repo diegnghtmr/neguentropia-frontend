@@ -6,8 +6,8 @@ SPA local React 19, Vite 8, TypeScript estricto y Tailwind CSS 4. La pantalla de
 
 - Docker operativo. Node, npm, instalación, pruebas, compilación y aplicación se ejecutan dentro de contenedores; no instalar Node en el anfitrión.
 - Node 24 y npm 11. El lockfile fija el árbol instalado; usar `npm ci`.
-- No se incluyen corpus, modelos, credenciales, resultados ni instrucciones privadas en esta entrega.
-- Los algoritmos se implementan en Java. Las pruebas sintéticas de esta unidad no acreditan integración real, revisión del corpus, CORS, inferencia, despliegue ni cierre de la fase de bases.
+- No se incluyen corpus, modelos, credenciales, resultados ni instrucciones privadas en este repositorio.
+- Los algoritmos se implementan en Java. Las pruebas usan datos sintéticos y red simulada.
 
 Ejecutar los comandos desde la carpeta `frontend/`, que es también el único contexto Docker de la aplicación.
 
@@ -104,7 +104,7 @@ docker run --rm --network=host \
 
 `--network=host` corresponde a Docker Engine en Linux; en otros entornos, seleccionar una red/ruta que llegue al servidor. También se puede usar `--network=container:<nombre>` para compartir la red de un contenedor de prueba y establecer `FRONTEND_ORIGIN=http://127.0.0.1:80` (o el `PORT` alternativo). La comprobación no hace solicitudes de análisis ni necesita corpus. No sustituye la revisión funcional en navegador.
 
-## Estructura y siguientes unidades
+## Estructura
 
 - `src/app/`: composición del shell accesible y su prueba.
 - `src/features/corpus/`: catálogo, lectura del original, schemas y pruebas sintéticas.
@@ -119,8 +119,8 @@ El catálogo solo se muestra si contiene exactamente 20 IDs únicos, seis métod
 
 Las pruebas usan exclusivamente 20 registros sintéticos nuevos por caso y red simulada; no contienen abstracts reales. Cubren invariantes, errores, carga, selección, respuestas fuera de orden y regresiones del shell (marca, landmark principal y ausencia de análisis). El health y la preparación son responsabilidad del backend: esta pantalla no inventa su estado desde liveness.
 
-No se crean features vacías, librerías de gráficas sin uso ni un framework genérico. Ranking, similitud, agrupamiento y búsqueda siguen fuera de esta unidad. Quedan pendientes la integración con el manifiesto privado montado readonly, HTTP/CORS reales, construcción de imágenes y revisión en navegador a cargo del coordinador.
+No se crean features vacías, librerías de gráficas sin uso ni un framework genérico. Ranking, similitud, agrupamiento y búsqueda aún no están implementados.
 
-## Alojamiento pendiente
+## Alojamiento
 
-`Dockerfile.vercel` es la ruta Docker adoptada para Vercel Container Runtime Beta, reutilizada localmente. El puerto configurado en el proveedor debe coincidir con Nginx. Acceso Beta, cuenta, plan, costos, límites, rutas/SPA y ejecución alojada requieren comprobación y autorización separadas. Este README no acredita despliegue ni configura CD, remotos o CI propio.
+`Dockerfile.vercel` es la ruta Docker adoptada para Vercel Container Runtime Beta, reutilizada localmente. El puerto configurado en el proveedor debe coincidir con Nginx. No hay despliegue ni CI configurados.
