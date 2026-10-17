@@ -44,5 +44,12 @@ export const rankingSchema = z.strictObject({
     data.totalTokenCount < data.maxFrequency || data.totalTokenCount < data.distinctTermCount) {
     ctx.addIssue({ code: 'custom', path: ['results'], message: 'Inconsistent ranking statistics or order' });
   }
+  // Contract rule: V=0 gives B=width=0; otherwise B=max(1,floor(sqrt(V))) and width=ceil((Fmax+1)/B).
+  const vocabulary = data.distinctTermCount;
+  const bucketCount = vocabulary === 0 ? 0 : Math.max(1, Math.floor(Math.sqrt(vocabulary)));
+  const bucketWidth = vocabulary === 0 ? 0 : Math.ceil((data.maxFrequency + 1) / bucketCount);
+  if (data.parameters.bucketCount !== bucketCount || data.parameters.bucketWidth !== bucketWidth) {
+    ctx.addIssue({ code: 'custom', path: ['parameters'], message: 'Bucket parameters do not match the contract' });
+  }
 });
 export type RankingResponse = z.infer<typeof rankingSchema>;

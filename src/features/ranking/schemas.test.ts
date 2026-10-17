@@ -23,6 +23,9 @@ describe('ranking response boundary', () => {
     (f: ReturnType<typeof rankingFixture>) => ({ ...f, preprocessing: { ...f.preprocessing, stopwordsRemoved: true } }),
     (f: ReturnType<typeof rankingFixture>) => ({ ...f, results: f.results.map((r) => ({ ...r, sortMilliseconds: -1 })) }),
     (f: ReturnType<typeof rankingFixture>) => ({ ...f, distinctTermCount: 4 }),
+    (f: ReturnType<typeof rankingFixture>) => ({ ...f, parameters: { ...f.parameters, bucketCount: 0, bucketWidth: 0 } }),
+    (f: ReturnType<typeof rankingFixture>) => ({ ...f, parameters: { ...f.parameters, bucketCount: 2 } }),
+    (f: ReturnType<typeof rankingFixture>) => ({ ...f, parameters: { ...f.parameters, bucketWidth: 11 } }),
     (f: ReturnType<typeof rankingFixture>) => ({ ...f, results: f.results.map((r, i) => ({ ...r, topTerms: i === 1 ? [...r.topTerms].reverse() : r.topTerms })) }),
   ])('rejects incompatible response %#', (change) => {
     expect(rankingSchema.safeParse(change(rankingFixture())).success).toBe(false);
@@ -42,5 +45,12 @@ describe('ranking response boundary', () => {
       parameters: { ...f.parameters, bucketCount: 0, bucketWidth: 0 },
       results: f.results.map((r) => ({ ...r, topTerms: [], sortMilliseconds: 0 })),
     }).success).toBe(true);
+  });
+  it('rejects bucket parameters on an empty vocabulary', () => {
+    const f = rankingFixture();
+    expect(rankingSchema.safeParse({ ...f, totalTokenCount: 0, distinctTermCount: 0, maxFrequency: 0,
+      parameters: { ...f.parameters, bucketCount: 1, bucketWidth: 1 },
+      results: f.results.map((r) => ({ ...r, topTerms: [], sortMilliseconds: 0 })),
+    }).success).toBe(false);
   });
 });
