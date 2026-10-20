@@ -1,14 +1,14 @@
 import * as React from "react"
-import { rim, path as serializePath } from "@/features/corpus/lib/cojeev-motion/geometry"
-import { fromShape, SHAPES } from "@/features/corpus/lib/cojeev-motion/shapes"
-import { bodyPadding, createBody, rewindBody, stepBody, type Body } from "@/features/corpus/lib/cojeev-motion/body"
-import { getMotionSettings, getMorphProfile, getSettingsSnapshot, subscribeMotion, type Category } from "@/features/corpus/lib/cojeev-motion/settings"
+import { rim, path as serializePath } from "@/shared/lib/cojeev-motion/geometry"
+import { fromShape, SHAPES } from "@/shared/lib/cojeev-motion/shapes"
+import { bodyPadding, createBody, rewindBody, stepBody, type Body } from "@/shared/lib/cojeev-motion/body"
+import { getMotionSettings, getMorphProfile, getSettingsSnapshot, subscribeMotion, type Category } from "@/shared/lib/cojeev-motion/settings"
 
-import { resolveMorphHost, resolveMorphTier, registerMorphHost } from "@/features/corpus/lib/cojeev-motion/category"
-import { createMorphOverlays, morphColor } from "@/features/corpus/lib/cojeev-motion/morph-paint"
-import { motionClock, registerMotionClock } from "@/features/corpus/lib/cojeev-motion/clock"
-export { motionClock } from "@/features/corpus/lib/cojeev-motion/clock"
-export { enableMorph, disableMorph } from "@/features/corpus/lib/cojeev-motion/category"
+import { resolveMorphHost, resolveMorphTier, registerMorphHost } from "@/shared/lib/cojeev-motion/category"
+import { createMorphOverlays, morphColor } from "@/shared/lib/cojeev-motion/morph-paint"
+import { motionClock, registerMotionClock } from "@/shared/lib/cojeev-motion/clock"
+export { motionClock } from "@/shared/lib/cojeev-motion/clock"
+export { enableMorph, disableMorph } from "@/shared/lib/cojeev-motion/category"
 
 const instances=new Set<{measure:(t:number)=>void;invalidate:()=>void;frame:(t:number,dt:number)=>boolean;rewind:()=>void;reseed:()=>void;refresh:()=>void}>()
 let clock:number|null=null,previous:number|null=null,raf=0,seed:number|null=null

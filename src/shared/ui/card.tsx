@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useMorph } from "@/features/corpus/lib/cojeev-motion/use-morph";
-import { useDepth } from "@/features/corpus/lib/cojeev-motion/use-depth";
-import { assignMotionRef } from "@/features/corpus/lib/cojeev-motion/refs";
+import { useMorph } from "@/shared/lib/cojeev-motion/use-morph";
+import { useDepth } from "@/shared/lib/cojeev-motion/use-depth";
+import { assignMotionRef } from "@/shared/lib/cojeev-motion/refs";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/features/corpus/lib/utils";
-import { useChoreography } from "@/features/corpus/lib/cojeev-motion/choreography";
+import { cn } from "@/shared/lib/utils";
+import { useChoreography } from "@/shared/lib/cojeev-motion/choreography";
 
 const cardVariants = cva(
   "v-card relative min-w-0 content-start overflow-hidden rounded-[var(--r-card)] p-[var(--card-pad)] bg-[var(--card)] text-[color:var(--card-foreground)]",

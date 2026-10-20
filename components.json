@@ -10,11 +10,11 @@
     "cssVariables": true
   },
   "aliases": {
-    "components": "@/features/corpus",
-    "ui": "@/features/corpus/ui",
-    "utils": "@/features/corpus/lib/utils",
-    "lib": "@/features/corpus/lib",
-    "hooks": "@/features/corpus/lib/hooks"
+    "components": "@/shared",
+    "ui": "@/shared/ui",
+    "utils": "@/shared/lib/utils",
+    "lib": "@/shared/lib",
+    "hooks": "@/shared/lib/hooks"
   },
   "registries": { "@cojeev": "https://cojeev.com/ui/r/{name}.json" }
 }

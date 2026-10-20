@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { z } from 'zod';
-import { Card, CardHeader, CardTitle, CardContent } from '../corpus/ui/card';
-import { Badge } from '../corpus/ui/badge';
-import { Alert, AlertBody, AlertTitle, AlertDescription } from '../corpus/ui/alert';
-import { NativeSelect, NativeSelectOption } from '../corpus/ui/native-select';
+import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
+import { Badge } from '@/shared/ui/badge';
+import { Alert, AlertBody, AlertTitle, AlertDescription } from '@/shared/ui/alert';
+import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
 import { loadRanking } from './client';
 import type { RankingResponse } from './schemas';
 

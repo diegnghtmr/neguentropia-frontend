@@ -1,4 +1,4 @@
-import { factoryTiers, type Category, type MotionSettings, type MorphProfile, type TierName } from "@/features/corpus/lib/cojeev-motion/settings"
+import { factoryTiers, type Category, type MotionSettings, type MorphProfile, type TierName } from "@/shared/lib/cojeev-motion/settings"
 export const CATS:Record<Category,{sel:string;tier:TierName}>={
 buttons:{sel:'.v-btn:not(.-ghost),.v-select,.v-toggle,.v-native,.v-dock__action,.v-menubar__trigger,.v-cal__month,.v-caption-pill',tier:'pill'},
 icons:{sel:'.v-ibtn,.v-disk:not(.v-input>.v-disk):not(.v-igroup>.v-disk):not(.v-select .v-disk):not(.v-menu__item .v-disk),.v-search__disk,.v-collapse,.v-assist__close,.v-attached,.v-play,.v-edit,.v-node__port,.v-receipt__dot,.v-mood .v-face',tier:'tile'},

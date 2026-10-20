@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { useMorph } from "@/features/corpus/lib/cojeev-motion/use-morph";
+import { useMorph } from "@/shared/lib/cojeev-motion/use-morph";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/features/corpus/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import {
   controlRadiusStyle,
   type ControlRadius,
-} from "@/features/corpus/lib/cojeev/control-appearance";
+} from "@/shared/lib/cojeev/control-appearance";
 
 const badgeVariants = cva(
   "v-badge inline-flex items-center justify-center gap-[var(--s-2)] rounded-[var(--r-pill)] leading-none whitespace-nowrap bg-[var(--v-beige)] text-[color:var(--v-text)] tracking-[.005em]",

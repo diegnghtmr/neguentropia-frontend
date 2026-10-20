@@ -1,6 +1,6 @@
-import { path, type Point } from '@/features/corpus/lib/cojeev-motion/geometry'
-import type { Body } from '@/features/corpus/lib/cojeev-motion/body'
-import type { MorphConfig } from '@/features/corpus/lib/cojeev-motion/settings'
+import { path, type Point } from '@/shared/lib/cojeev-motion/geometry'
+import type { Body } from '@/shared/lib/cojeev-motion/body'
+import type { MorphConfig } from '@/shared/lib/cojeev-motion/settings'
 const NS='http://www.w3.org/2000/svg'
 let shared:SVGSVGElement|null=null,users=0,serial=0
 function node<K extends keyof SVGElementTagNameMap>(tag:K,attrs:Record<string,string>={}):SVGElementTagNameMap[K]{const el=document.createElementNS(NS,tag);for(const [key,value]of Object.entries(attrs))el.setAttribute(key,value);return el}

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useMotionValueEvent, useSpring } from "motion/react";
-import { motionTokens, useChoreography } from "@/features/corpus/lib/cojeev-motion/choreography";
+import { motionTokens, useChoreography } from "@/shared/lib/cojeev-motion/choreography";
 
 /** Small pointer-relative depth for opt-in surfaces. Native controls keep ownership. */
 export function useDepth(ref: React.RefObject<HTMLElement | null>, enabled: boolean) {

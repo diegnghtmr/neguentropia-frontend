@@ -1,12 +1,12 @@
 "use client";
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/features/corpus/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import {
   controlRadiusStyle,
   type ControlAppearanceProps,
-} from "@/features/corpus/lib/cojeev/control-appearance";
-import { useMorph } from "@/features/corpus/lib/cojeev-motion/use-morph";
+} from "@/shared/lib/cojeev/control-appearance";
+import { useMorph } from "@/shared/lib/cojeev-motion/use-morph";
 export const nativeSelectVariants = cva(
   "v-native appearance-none h-[var(--ctl-lg)] pl-[var(--s-5)] pr-[var(--s-10)] py-0 rounded-[var(--r-pill)] [border:0] bg-[var(--v-beige)] text-[length:var(--fs-control)] font-medium text-[color:var(--v-text)] cursor-pointer [box-shadow:inset_0_0_0_1px_var(--v-edge)] focus-visible:outline-2 focus-visible:outline-[var(--ring)] focus-visible:outline-offset-2",
   {

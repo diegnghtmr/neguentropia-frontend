@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { animate, frameSteps, motionValue, type AnimationPlaybackControls, type Transition } from "motion";
-import { getMotionTime, isMotionClockFrozen, registerMotionClock } from "@/features/corpus/lib/cojeev-motion/clock";
-import { getSettingsSnapshot, getServerSettingsSnapshot, subscribeSettings, type SettingsSnapshot } from "@/features/corpus/lib/cojeev-motion/settings";
-import { useReducedMotion } from "@/features/corpus/lib/cojeev-motion/use-reduced-motion";
+import { getMotionTime, isMotionClockFrozen, registerMotionClock } from "@/shared/lib/cojeev-motion/clock";
+import { getSettingsSnapshot, getServerSettingsSnapshot, subscribeSettings, type SettingsSnapshot } from "@/shared/lib/cojeev-motion/settings";
+import { useReducedMotion } from "@/shared/lib/cojeev-motion/use-reduced-motion";
 
 /** The shared rhythm. Durations and stagger are seconds, matching Motion's API. */
 export const motionTokens = {

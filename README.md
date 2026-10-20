@@ -50,7 +50,7 @@ Loading prevents duplicate submissions. Failures clear prior results and show fi
 
 ## Componentes del lector
 
-El lector usa los componentes NativeSelect, Card, Badge y Alert de [Cojeev UI](https://cojeev.com/ui/docs/), ubicados en `src/features/corpus/{ui,lib}/`; el tema y las fuentes locales DM Sans y Bricolage Grotesque son globales. La selección es un `select` nativo con veinte opciones en orden del catálogo, y un error o cambio de selección nunca presenta el resultado anterior como vigente. Las licencias de Cojeev (MIT) y de las fuentes (OFL) se sirven desde el pie de página.
+El lector usa los componentes NativeSelect, Card, Badge y Alert de [Cojeev UI](https://cojeev.com/ui/docs/), ubicados en `src/shared/{ui,lib}/`; el tema y las fuentes locales DM Sans y Bricolage Grotesque son globales. La selección es un `select` nativo con veinte opciones en orden del catálogo, y un error o cambio de selección nunca presenta el resultado anterior como vigente. Las licencias de Cojeev (MIT) y de las fuentes (OFL) se sirven desde el pie de página.
 
 ## Desarrollo local
 
@@ -105,6 +105,7 @@ docker run --rm --network=host \
 - `src/app/`: composición del shell accesible y su prueba.
 - `src/features/corpus/`: catálogo, lectura del original, schemas y pruebas sintéticas.
 - `src/features/ranking/`: explicit ranking action, validated HTTP boundary, three tables and synthetic tests.
+- `src/shared/`: componentes UI compartidos por corpus y ranking y sus utilidades de soporte.
 - `src/infrastructure/api/`: instancia Axios y URL pública de backend.
 - `src/main.tsx`: arranque React.
 - `src/styles.css`: estilos y Tailwind 4.

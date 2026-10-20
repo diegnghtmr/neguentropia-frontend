@@ -1,5 +1,5 @@
-import type {Rim, Point} from "@/features/corpus/lib/cojeev-motion/geometry"
-import { signatureShapePaths } from "@/features/corpus/lib/cojeev/signature-shapes"
+import type {Rim, Point} from "@/shared/lib/cojeev-motion/geometry"
+import { signatureShapePaths } from "@/shared/lib/cojeev/signature-shapes"
 // Authored true shapes, sampled by arc length using a detached SVG probe.
 const star=(n:number,ro:number,ri:number)=>{const a=[];for(let i=0;i<n*2;i++){const r=i%2?ri:ro,t=-Math.PI/2+i*Math.PI/n;a.push([50+r*Math.cos(t),50+r*Math.sin(t)])}return 'M'+a.map(p=>p.map(v=>v.toFixed(2)).join(' ')).join('L')+'Z'};
 const polar=(f:(th:number)=>number)=>(t:number):Point=>{const th=t*Math.PI*2;const r=f(th);return [50+r*Math.cos(th),50+r*Math.sin(th)]};

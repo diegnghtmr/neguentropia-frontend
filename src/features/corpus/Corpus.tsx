@@ -3,10 +3,10 @@ import axios from 'axios';
 import { z } from 'zod';
 import { loadCatalog, loadDetail } from './client';
 import type { Availability, PaperCatalog, PaperDetail } from './schemas';
-import { NativeSelect, NativeSelectOption } from './ui/native-select';
-import { Badge } from './ui/badge';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from './ui/card';
-import { Alert, AlertBody, AlertTitle, AlertDescription } from './ui/alert';
+import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
+import { Badge } from '@/shared/ui/badge';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/shared/ui/card';
+import { Alert, AlertBody, AlertTitle, AlertDescription } from '@/shared/ui/alert';
 
 type LoadState<T> = { state: 'loading' } | { state: 'ready'; data: T } | { state: 'error'; message: string };
 const errorCode = z.object({ code: z.string() });

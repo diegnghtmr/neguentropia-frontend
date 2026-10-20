@@ -1,5 +1,5 @@
-import {rim,path,spring,type Spring,type Rim,type Point} from "@/features/corpus/lib/cojeev-motion/geometry"
-import type {Tier,TierName,MorphConfig} from "@/features/corpus/lib/cojeev-motion/settings"
+import {rim,path,spring,type Spring,type Rim,type Point} from "@/shared/lib/cojeev-motion/geometry"
+import type {Tier,TierName,MorphConfig} from "@/shared/lib/cojeev-motion/settings"
 // Rim producers create at least 48 samples; loop and nearest-sample indices remain in bounds.
 type BodyFrame={d:string;points:Point[];press:number;active:boolean}
 const drawnFrames=new WeakMap<Body,{at:number;frame:BodyFrame}>()

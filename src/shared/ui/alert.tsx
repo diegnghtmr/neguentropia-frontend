@@ -1,8 +1,8 @@
 "use client";
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/features/corpus/lib/utils";
-import { useMorph } from "@/features/corpus/lib/cojeev-motion/use-morph";
+import { cn } from "@/shared/lib/utils";
+import { useMorph } from "@/shared/lib/cojeev-motion/use-morph";
 
 const AlertVariants = cva(
   "v-alert [display:grid] [gap:0_var(--s-4)] [align-items:start] [padding:var(--s-4)_var(--s-5)_var(--s-4)_var(--s-4)] [border-radius:var(--r-card)] [background:var(--v-beige)] [grid-template-columns:40px_minmax(0,1fr)] [position:relative] [overflow:hidden] [isolation:isolate]",
