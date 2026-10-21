@@ -1,17 +1,17 @@
 # Neguentropía — frontend
 
-SPA local React 19, Vite 8, TypeScript estricto y Tailwind CSS 4. La pantalla de corpus consulta el catálogo y el abstract seleccionado mediante Axios, valida las respuestas con Zod y muestra las capacidades reales del backend. No ejecuta análisis ni calcula frecuencias o algoritmos en JavaScript.
+Local SPA with React 19, Vite 8, strict TypeScript and Tailwind CSS 4. The corpus screen queries the catalog and the selected abstract through Axios, validates the responses with Zod and shows the backend's real capabilities. It does not run analyses or compute frequencies or algorithms in JavaScript.
 
-## Requisitos y alcance
+## Requirements and scope
 
-- Docker operativo. Node, npm, instalación, pruebas, compilación y aplicación se ejecutan dentro de contenedores; no instalar Node en el anfitrión.
-- Node 24 y npm 11. El lockfile fija el árbol instalado; usar `npm ci`.
-- No se incluyen corpus, modelos, credenciales, resultados ni instrucciones privadas en este repositorio.
-- Los algoritmos se implementan en Java. Las pruebas usan datos sintéticos y red simulada.
+- A working Docker. Node, npm, installation, tests, build and application run inside containers; do not install Node on the host.
+- Node 24 and npm 11. The lockfile pins the installed tree; use `npm ci`.
+- No corpus, models, credentials, results or private instructions are included in this repository.
+- The algorithms are implemented in Java. The tests use synthetic data and a mocked network.
 
-Ejecutar los comandos desde la carpeta `frontend/`, que es también el único contexto Docker de la aplicación.
+Run the commands from the `frontend/` folder, which is also the application's only Docker context.
 
-## Instalar y comprobar
+## Install and check
 
 ```sh
 docker run --rm --user "$(id -u):$(id -g)" --env HOME=/tmp \
@@ -20,7 +20,7 @@ docker run --rm --user "$(id -u):$(id -g)" --env HOME=/tmp \
   npm ci --ignore-scripts --no-fund --no-audit
 ```
 
-`--ignore-scripts` evita ejecutar scripts de instalación de dependencias. No omitir las dependencias opcionales de plataforma que necesita el bundler. No actualizar globalmente npm por un aviso de versión.
+`--ignore-scripts` prevents running dependency install scripts. Do not omit the optional platform dependencies the bundler needs. Do not upgrade npm globally because of a version notice.
 
 ```sh
 docker run --rm --network=none --user "$(id -u):$(id -g)" --env HOME=/tmp \
@@ -31,14 +31,14 @@ docker run --rm --network=none --user "$(id -u):$(id -g)" --env HOME=/tmp \
 
 Scripts:
 
-| Comando dentro del contenedor | Función |
+| Command inside the container | Purpose |
 | --- | --- |
-| `npm run dev` | Vite en `0.0.0.0`; desarrollo, no servidor de producción |
-| `npm test` | Suite Vitest finita, sin modo watch |
-| `npm test -- src/features/corpus src/app/App.test.tsx` | Pruebas enfocadas de schemas, cliente, corpus y shell |
-| `npm run typecheck` | TypeScript sin emitir archivos |
-| `npm run build` | Typecheck y build Vite en `dist/` |
-| `npm run preview` | Inspección local del build; no producción |
+| `npm run dev` | Vite on `0.0.0.0`; development, not a production server |
+| `npm test` | Finite Vitest suite, no watch mode |
+| `npm test -- src/features/corpus src/app/App.test.tsx` | Focused tests for schemas, client, corpus and shell |
+| `npm run typecheck` | TypeScript without emitting files |
+| `npm run build` | Typecheck and Vite build into `dist/` |
+| `npm run preview` | Local inspection of the build; not production |
 
 ## Ranking view
 
@@ -48,13 +48,13 @@ Each method has a top-15 table (or all available terms when fewer than 15 exist)
 
 Loading prevents duplicate submissions. Failures clear prior results and show fixed, sanitized messages for invalid requests, unavailable service, server/network errors or incompatible responses. Leaving Ranking aborts its pending request and discards its result; cancellation does not guarantee stopping Java work. Tests use synthetic fixtures and mocked HTTP only; browser layout and real backend acceptance are separate checks.
 
-## Componentes del lector
+## Reader components
 
-El lector usa los componentes NativeSelect, Card, Badge y Alert de [Cojeev UI](https://cojeev.com/ui/docs/), ubicados en `src/shared/{ui,lib}/`; el tema y las fuentes locales DM Sans y Bricolage Grotesque son globales. La selección es un `select` nativo con veinte opciones en orden del catálogo, y un error o cambio de selección nunca presenta el resultado anterior como vigente. Las licencias de Cojeev (MIT) y de las fuentes (OFL) se sirven desde el pie de página.
+The reader uses the NativeSelect, Card, Badge and Alert components from [Cojeev UI](https://cojeev.com/ui/docs/), located in `src/shared/{ui,lib}/`; the theme and the local DM Sans and Bricolage Grotesque fonts are global. The selection is a native `select` with twenty options in catalog order, and an error or a selection change never presents the previous result as current. The Cojeev (MIT) and font (OFL) licenses are served from the footer.
 
-## Desarrollo local
+## Local development
 
-Después de instalar:
+After installing:
 
 ```sh
 docker run --rm -it --user "$(id -u):$(id -g)" --env HOME=/tmp \
@@ -64,11 +64,11 @@ docker run --rm -it --user "$(id -u):$(id -g)" --env HOME=/tmp \
   npm run dev -- --port 5173 --strictPort
 ```
 
-Abrir `http://127.0.0.1:5173`. Sin configuración, el cliente consulta `/api/papers` y `/api/papers/{id}` en el mismo origen. Si no existe backend allí, muestra un error: no usa fixtures ni datos de respaldo.
+Open `http://127.0.0.1:5173`. Without configuration, the client queries `/api/papers` and `/api/papers/{id}` on the same origin. If no backend exists there, it shows an error: it does not use fixtures or fallback data.
 
-Para un backend en otro origen, pasar `--env VITE_API_BASE_URL=http://127.0.0.1:8081` al contenedor de desarrollo. Esta variable opcional contiene solo la URL pública base del backend, sin el sufijo `/api`; el cliente añade ese sufijo. Nunca colocar claves en `VITE_*`: sus valores se incorporan al JavaScript servido. El backend debe permitir explícitamente el origen frontend mediante su configuración CORS. No se añade proxy ni servicio intermedio.
+For a backend on another origin, pass `--env VITE_API_BASE_URL=http://127.0.0.1:8081` to the development container. This optional variable contains only the backend's public base URL, without the `/api` suffix; the client adds that suffix. Never put keys in `VITE_*`: their values are embedded in the served JavaScript. The backend must explicitly allow the frontend origin through its CORS configuration. No proxy or intermediate service is added.
 
-## Imagen de producción local
+## Local production image
 
 ```sh
 docker build --file Dockerfile.vercel --tag neguentropia-frontend:local \
@@ -76,19 +76,19 @@ docker build --file Dockerfile.vercel --tag neguentropia-frontend:local \
 docker run --rm -p 127.0.0.1:4174:80 neguentropia-frontend:local
 ```
 
-Abrir `http://127.0.0.1:4174`; configurar en el backend el origen permitido exacto `http://127.0.0.1:4174`. Omitir el ARG conserva las peticiones relativas `/api`. La URL se fija al compilar: cambiar una variable del contenedor Nginx no reconfigura el bundle. La imagen multietapa usa Node para compilar y Nginx para servir solamente el resultado estático. Las bases están fijadas por digest. No copia `node_modules`, fuentes de desarrollo, notas o secretos a la imagen final.
+Open `http://127.0.0.1:4174`; configure the exact allowed origin `http://127.0.0.1:4174` in the backend. Omitting the ARG keeps relative `/api` requests. The URL is fixed at build time: changing a variable of the Nginx container does not reconfigure the bundle. The multi-stage image uses Node to build and Nginx to serve only the static output. The base images are pinned by digest. It does not copy `node_modules`, development sources, notes or secrets into the final image.
 
-`PORT` configura el puerto interno de Nginx al arrancar; su valor predeterminado es `80`. La publicación de puertos debe coincidir:
+`PORT` sets Nginx's internal port at startup; its default value is `80`. Port publishing must match:
 
 ```sh
 docker run --rm --env PORT=8080 -p 127.0.0.1:4174:8080 neguentropia-frontend:local
 ```
 
-Nginx sustituye solo `PORT` en su plantilla; conserva `$uri` para resolver archivos. Las rutas profundas devuelven la SPA; los assets inexistentes responden 404, no el HTML de la aplicación. Los bundles con hash tienen caché immutable y el documento HTML usa no-cache. Un puerto inválido hace fallar la configuración Nginx; no hay fallback a otro servidor.
+Nginx substitutes only `PORT` in its template; it keeps `$uri` to resolve files. Deep routes return the SPA; missing assets answer 404, not the application HTML. Hashed bundles have immutable caching and the HTML document uses no-cache. An invalid port makes the Nginx configuration fail; there is no fallback to another server.
 
-## Comprobar el servidor real
+## Check the real server
 
-En una terminal, iniciar la imagen local. En otra, comprobar raíz, MIME/contenido de assets, icono, fallback SPA y 404:
+In one terminal, start the local image. In another, check the root, asset MIME/content, icon, SPA fallback and 404:
 
 ```sh
 docker run --rm --network=host \
@@ -98,27 +98,27 @@ docker run --rm --network=host \
   node --test /checks/check-container.mjs
 ```
 
-`--network=host` corresponde a Docker Engine en Linux; en otros entornos, seleccionar una red/ruta que llegue al servidor. También se puede usar `--network=container:<nombre>` para compartir la red de un contenedor de prueba y establecer `FRONTEND_ORIGIN=http://127.0.0.1:80` (o el `PORT` alternativo). La comprobación no hace solicitudes de análisis ni necesita corpus. No sustituye la revisión funcional en navegador.
+`--network=host` applies to Docker Engine on Linux; in other environments, choose a network/route that reaches the server. You can also use `--network=container:<name>` to share the network of a test container and set `FRONTEND_ORIGIN=http://127.0.0.1:80` (or the alternative `PORT`). The check makes no analysis requests and needs no corpus. It does not replace functional review in a browser.
 
-## Estructura
+## Structure
 
-- `src/app/`: composición del shell accesible y su prueba.
-- `src/features/corpus/`: catálogo, lectura del original, schemas y pruebas sintéticas.
+- `src/app/`: composition of the accessible shell and its test.
+- `src/features/corpus/`: catalog, original reader, schemas and synthetic tests.
 - `src/features/ranking/`: explicit ranking action, validated HTTP boundary, three tables and synthetic tests.
-- `src/shared/`: componentes UI compartidos por corpus y ranking y sus utilidades de soporte.
-- `src/infrastructure/api/`: instancia Axios y URL pública de backend.
-- `src/main.tsx`: arranque React.
-- `src/styles.css`: estilos y Tailwind 4.
-- `src/test/`: preparación del runner.
-- `nginx/`: plantilla de servidor estático.
-- `scripts/check-container.mjs`: comprobación HTTP de la imagen ya iniciada.
+- `src/shared/`: UI components shared by corpus and ranking, and their support utilities.
+- `src/infrastructure/api/`: Axios instance and public backend URL.
+- `src/main.tsx`: React bootstrap.
+- `src/styles.css`: styles and Tailwind 4.
+- `src/test/`: test runner setup.
+- `nginx/`: static server template.
+- `scripts/check-container.mjs`: HTTP check of the already started image.
 
-El catálogo solo se muestra si contiene exactamente 20 IDs únicos, seis métodos soportados únicos y disponibilidades coherentes. El detalle debe coincidir en ID y versión del corpus; el texto original se conserva y renderiza como texto, nunca HTML. Cambiar o borrar la selección descarta el detalle anterior y aborta su petición; respuestas obsoletas no actualizan la pantalla. Los errores se muestran sin detalles privados ni datos anteriores como éxito vigente. Las capacidades son informativas, incluso cuando el backend declara alguna disponible.
+The catalog is shown only if it contains exactly 20 unique IDs, six unique supported methods and consistent availabilities. The detail must match the ID and the corpus version; the original text is kept and rendered as text, never HTML. Changing or clearing the selection discards the previous detail and aborts its request; stale responses do not update the screen. Errors are shown without private details or previous data presented as a current success. Capabilities are informational, even when the backend declares one as available.
 
-Las pruebas usan exclusivamente 20 registros sintéticos nuevos por caso y red simulada; no contienen abstracts reales. Cubren invariantes, errores, carga, selección, respuestas fuera de orden y regresiones del shell (marca, landmark principal y navegación explícita). El health y la preparación son responsabilidad del backend: esta pantalla no inventa su estado desde liveness.
+The tests use only 20 new synthetic records per case and a mocked network; they contain no real abstracts. They cover invariants, errors, loading, selection, out-of-order responses and shell regressions (brand, main landmark and explicit navigation). Health and preparation are the backend's responsibility: this screen does not infer their state from liveness.
 
-No se crean features vacías, librerías de gráficas sin uso ni un framework genérico. Similitud, agrupamiento y búsqueda aún no están implementados.
+No empty features, unused chart libraries or generic framework are created. Similarity, clustering and search are not implemented yet.
 
-## Alojamiento
+## Hosting
 
-`Dockerfile.vercel` es la ruta Docker adoptada para Vercel Container Runtime Beta, reutilizada localmente. El puerto configurado en el proveedor debe coincidir con Nginx.
+`Dockerfile.vercel` is the Docker path adopted for Vercel Container Runtime Beta, reused locally. The port configured in the provider must match Nginx.
