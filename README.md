@@ -121,4 +121,4 @@ No se crean features vacías, librerías de gráficas sin uso ni un framework ge
 
 ## Alojamiento
 
-`Dockerfile.vercel` es la ruta Docker adoptada para Vercel Container Runtime Beta, reutilizada localmente. El puerto configurado en el proveedor debe coincidir con Nginx. No hay despliegue ni CI configurados.
+`Dockerfile.vercel` es la ruta Docker adoptada para Vercel Container Runtime Beta, reutilizada localmente. El puerto configurado en el proveedor debe coincidir con Nginx.
