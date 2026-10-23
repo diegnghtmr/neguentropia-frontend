@@ -3,7 +3,6 @@ import type { PaperCatalog, PaperDetail } from './schemas';
 // Synthetic records only; each call creates isolated mutable test data.
 export function syntheticCatalog(): PaperCatalog {
   return {
-    corpusVersion: 'synthetic-v1',
     corpusState: 'ready',
     papers: Array.from({ length: 20 }, (_, index) => ({
       id: `synthetic-${index + 1}`,
@@ -23,10 +22,9 @@ export function syntheticCatalog(): PaperCatalog {
 
 export function syntheticDetail(id = 'synthetic-1'): PaperDetail {
   return {
-    corpusVersion: 'synthetic-v1', id,
+    id,
     title: `Synthetic paper ${id.split('-')[1]}`,
     authors: ['Synthetic Author'],
     originalAbstract: '  Synthetic e\u0301 🌱 <script>text only</script>\nUnchanged.  ',
-    abstractSha256: 'a'.repeat(64),
   };
 }

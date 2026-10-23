@@ -34,14 +34,14 @@ describe('corpus HTTP client', () => {
   });
   it('encodes opaque IDs as a single path segment', async () => {
     const adapter = respond(syntheticDetail('opaque/id ?'));
-    await loadDetail('opaque/id ?', 'synthetic-v1');
+    await loadDetail('opaque/id ?');
     expect(adapter.mock.calls[0]![0].url).toBe('/papers/opaque%2Fid%20%3F');
   });
   it.each([
-    { id: 'synthetic-2' }, { corpusVersion: 'synthetic-v2' }, { originalAbstract: '' },
+    { id: 'synthetic-2' }, { originalAbstract: '' },
   ])('rejects incompatible detail %j', async (change) => {
     respond({ ...syntheticDetail(), ...change });
-    await expect(loadDetail('synthetic-1', 'synthetic-v1')).rejects.toThrow();
+    await expect(loadDetail('synthetic-1')).rejects.toThrow();
   });
   it('does not replace a network failure with fixture data or retry', async () => {
     const adapter = vi.fn<AxiosAdapter>().mockRejectedValue(new Error('offline'));

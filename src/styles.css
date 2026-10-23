@@ -85,19 +85,6 @@ body { min-width: 20rem; }
   gap: var(--s-6);
   border: 1px solid var(--v-blue-deep);
 }
-.corpus-version {
-  width: 100%;
-  padding-top: var(--s-4);
-  border-top: 1px solid var(--v-blue-deep);
-  color: var(--muted-foreground-ink);
-  font-size: var(--fs-meta);
-  line-height: 1.6;
-}
-.corpus-version span, .corpus-hash span {
-  display: block;
-  overflow-wrap: anywhere;
-  text-wrap: wrap;
-}
 .corpus-selection { display: grid; gap: var(--s-2); width: 100%; min-width: 0; }
 .corpus-selection label { font-weight: var(--fw-semibold); }
 .corpus-selection select { min-width: 0; max-width: 100%; }
@@ -123,15 +110,6 @@ body { min-width: 20rem; }
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   line-height: 1.8;
-}
-.corpus-hash {
-  width: 100%;
-  max-width: 80ch;
-  padding-top: var(--s-4);
-  border-top: 1px solid var(--border);
-  color: var(--muted-foreground);
-  font-size: var(--fs-meta);
-  line-height: 1.6;
 }
 .corpus-feedback { min-width: 0; }
 .corpus-capabilities {

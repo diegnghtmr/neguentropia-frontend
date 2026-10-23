@@ -6,11 +6,11 @@ export async function loadCatalog(signal?: AbortSignal) {
   return catalogSchema.parse(response.data);
 }
 
-export async function loadDetail(id: string, corpusVersion: string, signal?: AbortSignal) {
+export async function loadDetail(id: string, signal?: AbortSignal) {
   const response = await http.get<unknown>(`/papers/${encodeURIComponent(id)}`, signal ? { signal } : {});
   const detail = detailSchema.parse(response.data);
-  if (detail.id !== id || detail.corpusVersion !== corpusVersion) {
-    throw new Error('Paper identity or corpus version does not match the catalog.');
+  if (detail.id !== id) {
+    throw new Error('Paper identity does not match the catalog.');
   }
   return detail;
 }

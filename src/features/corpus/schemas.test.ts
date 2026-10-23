@@ -54,7 +54,7 @@ describe('corpus response boundary', () => {
   });
   it.each([
     { originalAbstract: '' }, { originalAbstract: '\ud800' },
-    { abstractSha256: 'not-a-hash' }, { corpusVersion: '' }, { sourceFile: '/private' },
+    { sourceFile: '/private' },
   ])('rejects invalid detail %j', (change) => {
     expect(detailSchema.safeParse({ ...syntheticDetail(), ...change }).success).toBe(false);
   });

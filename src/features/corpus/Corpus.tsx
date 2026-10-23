@@ -5,7 +5,7 @@ import { loadCatalog, loadDetail } from './client';
 import type { Availability, PaperCatalog, PaperDetail } from './schemas';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
 import { Badge } from '@/shared/ui/badge';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/shared/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/shared/ui/card';
 import { Alert, AlertBody, AlertTitle, AlertDescription } from '@/shared/ui/alert';
 
 type LoadState<T> = { state: 'loading' } | { state: 'ready'; data: T } | { state: 'error'; message: string };
@@ -67,10 +67,9 @@ export function Corpus() {
                 {catalog.data.papers.map((paper) => <NativeSelectOption key={paper.id} value={paper.id}>{paper.title}</NativeSelectOption>)}
               </NativeSelect>
             </div>
-            <p className="corpus-version">Corpus version: <span>{catalog.data.corpusVersion}</span></p>
           </Card>
           <div className="corpus-reading">
-            {selectedId ? <PaperReader key={`${catalog.data.corpusVersion}:${selectedId}`} id={selectedId} corpusVersion={catalog.data.corpusVersion} /> : <Card variant="cream" className="corpus-empty"><p>Select a paper to read its original abstract.</p></Card>}
+            {selectedId ? <PaperReader key={selectedId} id={selectedId} /> : <Card variant="cream" className="corpus-empty"><p>Select a paper to read its original abstract.</p></Card>}
           </div>
         </div>
         <section aria-labelledby="capabilities-heading" className="corpus-capabilities">
@@ -99,17 +98,17 @@ function ReaderFeedback({ message, error = false }: { message: string; error?: b
   );
 }
 
-// Keyed by version + selection so the old detail cannot survive a selection change.
-function PaperReader({ id, corpusVersion }: { id: string; corpusVersion: string }) {
+// Keyed by selection so the old detail cannot survive a selection change.
+function PaperReader({ id }: { id: string }) {
   const [detail, setDetail] = useState<LoadState<PaperDetail>>({ state: 'loading' });
   useEffect(() => {
     const controller = new AbortController();
-    loadDetail(id, corpusVersion, controller.signal).then(
+    loadDetail(id, controller.signal).then(
       (data) => { if (!controller.signal.aborted) setDetail({ state: 'ready', data }); },
       (error: unknown) => { if (!controller.signal.aborted) setDetail({ state: 'error', message: errorMessage(error, 'abstract') }); },
     );
     return () => controller.abort();
-  }, [id, corpusVersion]);
+  }, [id]);
   if (detail.state === 'loading') return <ReaderFeedback message="Loading abstract…" />;
   if (detail.state === 'error') return <ReaderFeedback error message={detail.message} />;
   return (
@@ -125,9 +124,6 @@ function PaperReader({ id, corpusVersion }: { id: string; corpusVersion: string 
           <h4>Original abstract</h4>
           <p data-testid="original-abstract" className="corpus-abstract">{detail.data.originalAbstract}</p>
         </CardContent>
-        <CardFooter>
-          <p className="corpus-hash">Abstract SHA-256: <span>{detail.data.abstractSha256}</span></p>
-        </CardFooter>
       </Card>
     </article>
   );

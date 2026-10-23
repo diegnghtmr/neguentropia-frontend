@@ -15,7 +15,6 @@ export const availabilitySchema = z.discriminatedUnion('available', [
   z.strictObject({ available: z.literal(false), blockedReason }),
 ]);
 export const catalogSchema = z.strictObject({
-  corpusVersion: text,
   corpusState: z.literal('ready'),
   papers: z.array(z.strictObject(summaryShape)).length(20).refine(
     (papers) => new Set(papers.map((paper) => paper.id)).size === papers.length, 'Duplicate paper IDs',
@@ -30,10 +29,8 @@ export const catalogSchema = z.strictObject({
   }),
 });
 export const detailSchema = z.strictObject({
-  corpusVersion: text,
   ...summaryShape,
   originalAbstract: text,
-  abstractSha256: z.string().regex(/^[a-f0-9]{64}$/),
 });
 export type PaperCatalog = z.infer<typeof catalogSchema>;
 export type PaperDetail = z.infer<typeof detailSchema>;

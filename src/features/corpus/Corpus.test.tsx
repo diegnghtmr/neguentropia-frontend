@@ -32,7 +32,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('Corpus screen', () => {
-  it('announces loading before showing an ordered, complete catalog and version', async () => {
+  it('announces loading before showing an ordered, complete catalog', async () => {
     const request = deferred<ReturnType<typeof syntheticCatalog>>();
     catalogRequest.mockReturnValue(request.promise);
     render(<Corpus />);
@@ -40,7 +40,7 @@ describe('Corpus screen', () => {
     expect(screen.getByRole('status')).toHaveAttribute('data-slot', 'alert');
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
     await act(async () => { request.resolve(syntheticCatalog()); });
-    expect(screen.getByText('synthetic-v1')).toBeVisible();
+    expect(screen.queryByText(/Corpus version/)).not.toBeInTheDocument();
     const options = screen.getAllByRole('option');
     expect(options.slice(1).map((option) => option.getAttribute('value'))).toEqual(syntheticCatalog().papers.map((paper) => paper.id));
     expect(detailRequest).not.toHaveBeenCalled();
@@ -73,13 +73,13 @@ describe('Corpus screen', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.queryByText(/private\/path/)).not.toBeInTheDocument();
   });
-  it('shows authors, exact original text and hash without interpreting HTML', async () => {
+  it('shows authors and exact original text without interpreting HTML', async () => {
     const { container } = render(<Corpus />);
     await select();
     const text = await screen.findByTestId('original-abstract');
     expect(text.textContent).toBe(syntheticDetail().originalAbstract);
     expect(container.querySelector('script')).toBeNull();
-    expect(screen.getByText('a'.repeat(64))).toBeVisible();
+    expect(screen.queryByText(/SHA-256/)).not.toBeInTheDocument();
     expect(screen.getByText('Synthetic Author')).toBeVisible();
     expect(screen.getByRole('article').querySelector('p')).toHaveTextContent('Synthetic Author');
     expect(screen.getByRole('heading', { name: syntheticDetail().title, level: 3 })).toHaveAttribute('id', 'paper-title');
