@@ -78,7 +78,7 @@ function RankingFeedback({ message, error = false }: { message: string; error?: 
 }
 function RankingResults({ data }: { data: RankingResponse }) {
   const metadata = [
-    ['Corpus version', data.corpusVersion], ['Preprocessing version', data.preprocessing.version],
+    ['Preprocessing version', data.preprocessing.version],
     ['Scope', data.scope], ['Papers', data.paperCount], ['Total tokens', data.totalTokenCount],
     ['Distinct terms', data.distinctTermCount], ['Max frequency', data.maxFrequency],
     ['Radix base', data.parameters.radixBase], ['Bucket strategy', data.parameters.bucketStrategy],

@@ -1,7 +1,6 @@
 export function rankingFixture() {
   const topTerms = [{ term: 'zeta', frequency: 9 }, { term: 'alpha', frequency: 9 }, { term: 'Ωμέγα', frequency: 2 }];
   return {
-    corpusVersion: 'synthetic-ranking-v1',
     preprocessing: {
       version: 'tokens-v1', unicodeNormalization: 'NFC', caseRule: 'Locale.ROOT-lowercase',
       tokenRule: 'unicode-letter-mark-digit-runs-with-letter', stopwordsRemoved: false,

@@ -22,7 +22,7 @@ export const rankingParametersSchema = z.strictObject({
   bucketCount: count, bucketWidth: count,
 });
 export const rankingSchema = z.strictObject({
-  corpusVersion: z.string().min(1), preprocessing: preprocessingSchema,
+  preprocessing: preprocessingSchema,
   scope: z.literal('all-20-abstracts'), paperCount: z.literal(20),
   totalTokenCount: count, distinctTermCount: count, maxFrequency: count,
   parameters: rankingParametersSchema,

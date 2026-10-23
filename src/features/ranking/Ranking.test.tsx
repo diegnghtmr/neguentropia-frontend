@@ -48,7 +48,7 @@ describe('Ranking screen', () => {
       expect(within(table).getAllByRole('row').slice(1).map((row) => within(row).getAllByRole('cell').map((cell) => cell.textContent)))
         .toEqual([['1', 'zeta', '9'], ['2', 'alpha', '9'], ['3', 'Ωμέγα', '2']]);
     }
-    for (const text of ['synthetic-ranking-v1', 'all-20-abstracts', 'tokens-v1', 'interval-counting', '0.125 ms', '0.25 ms', '0.375 ms']) {
+    for (const text of ['all-20-abstracts', 'tokens-v1', 'interval-counting', '0.125 ms', '0.25 ms', '0.375 ms']) {
       expect(screen.getByText(text)).toBeVisible();
     }
     expect(screen.getByText(/Java single-run timing; not a benchmark/)).toBeVisible();
