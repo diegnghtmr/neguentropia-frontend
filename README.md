@@ -44,7 +44,7 @@ Scripts:
 
 Use the Corpus and Ranking tabs (arrow keys, Home/End, or native button activation) to switch views. The corpus reader keeps its selection. Ranking runs only when **Run ranking** is pressed and POSTs `{}` to `/api/ranking` through the shared Axios client. A strict Zod boundary validates the corpus, preprocessing, parameters and three ordered results before rendering.
 
-Each method has a top-15 table (or all available terms when fewer than 15 exist), preserving Java's term order, ties and frequencies exactly. Run details identify the corpus version, fixed 20-abstract scope, sizes, Radix base and Bucket parameters. Durations are Java single-run sorting times in **ms**, not benchmarks, HTTP latency or browser render times. Tables use the existing Cojeev visual language without adding chart dependencies.
+Each method has a top-15 table (or all available terms when fewer than 15 exist), preserving Java's term order, ties and frequencies exactly. Run details show the preprocessing version, fixed 20-abstract scope, sizes, Radix base and Bucket parameters. Durations are Java single-run sorting times in **ms**, not benchmarks, HTTP latency or browser render times. Tables use the existing Cojeev visual language without adding chart dependencies.
 
 Loading prevents duplicate submissions. Failures clear prior results and show fixed, sanitized messages for invalid requests, unavailable service, server/network errors or incompatible responses. Leaving Ranking aborts its pending request and discards its result; cancellation does not guarantee stopping Java work. Tests use synthetic fixtures and mocked HTTP only; browser layout and real backend acceptance are separate checks.
 
@@ -113,7 +113,7 @@ docker run --rm --network=host \
 - `nginx/`: static server template.
 - `scripts/check-container.mjs`: HTTP check of the already started image.
 
-The catalog is shown only if it contains exactly 20 unique IDs, six unique supported methods and consistent availabilities. The detail must match the ID and the corpus version; the original text is kept and rendered as text, never HTML. Changing or clearing the selection discards the previous detail and aborts its request; stale responses do not update the screen. Errors are shown without private details or previous data presented as a current success. Capabilities are informational, even when the backend declares one as available.
+The catalog is shown only if it contains exactly 20 unique IDs, six unique supported methods and consistent availabilities. The detail must match the selected ID; the original text is kept and rendered as text, never HTML. Changing or clearing the selection discards the previous detail and aborts its request; stale responses do not update the screen. Errors are shown without private details or previous data presented as a current success. Capabilities are informational, even when the backend declares one as available.
 
 The tests use only 20 new synthetic records per case and a mocked network; they contain no real abstracts. They cover invariants, errors, loading, selection, out-of-order responses and shell regressions (brand, main landmark and explicit navigation). Health and preparation are the backend's responsibility: this screen does not infer their state from liveness.
 
