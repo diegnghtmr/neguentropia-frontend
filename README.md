@@ -42,7 +42,7 @@ Scripts:
 
 ## Ranking view
 
-Use the Corpus and Ranking tabs (arrow keys, Home/End, or native button activation) to switch views. The corpus reader keeps its selection. Ranking runs only when **Run ranking** is pressed and POSTs `{}` to `/api/ranking` through the shared Axios client. A strict Zod boundary validates the corpus, preprocessing, parameters and three ordered results before rendering.
+Use the Corpus and Ranking tabs (pointer, arrow keys or Home/End) to switch views. The corpus reader keeps its selection. Ranking runs only when **Run ranking** is pressed and POSTs `{}` to `/api/ranking` through the shared Axios client. A strict Zod boundary validates the corpus, preprocessing, parameters and three ordered results before rendering.
 
 Each method has a top-15 table (or all available terms when fewer than 15 exist), preserving Java's term order, ties and frequencies exactly. Run details show the preprocessing version, fixed 20-abstract scope, sizes, Radix base and Bucket parameters. Durations are Java single-run sorting times in **ms**, not benchmarks, HTTP latency or browser render times. Tables use the existing Cojeev visual language without adding chart dependencies.
 
@@ -50,7 +50,7 @@ Loading prevents duplicate submissions. Failures clear prior results and show fi
 
 ## Reader components
 
-The reader uses the Select, Card, Badge and Alert components from [Cojeev UI](https://cojeev.com/ui/docs/), located in `src/shared/{ui,lib}/`; the theme and the local DM Sans and Bricolage Grotesque fonts are global. The [Cojeev Select](https://cojeev.com/ui/docs/select/) opens twenty options in catalog order and supports keyboard navigation. It initially shows “Choose a paper”; after choosing a paper, select another to change the reading (there is no empty/reset option). Ranking uses the same component for its disabled, fixed analysis scope. An error or a selection change never presents the previous result as current. The Cojeev (MIT) and font (OFL) license texts are included in the build output under `licenses/`.
+The interface uses the Tabs, Select, Field, Label, Button, Table, Card, Badge, Alert, Empty and Spinner components from [Cojeev UI](https://cojeev.com/ui/docs/), located in `src/shared/{ui,lib}/`; the theme and the local DM Sans and Bricolage Grotesque fonts are global. The [Cojeev Select](https://cojeev.com/ui/docs/select/) opens twenty options in catalog order and supports keyboard navigation. It initially shows “Choose a paper”; after choosing a paper, select another to change the reading (there is no empty/reset option). Ranking uses the same component for its disabled, fixed analysis scope. An error or a selection change never presents the previous result as current. The Cojeev (MIT) and font (OFL) license texts are included in the build output under `licenses/`.
 
 ## Local development
 
