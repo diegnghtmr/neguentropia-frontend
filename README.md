@@ -1,6 +1,6 @@
 # Neguentropía — frontend
 
-Local SPA with React 19, Vite 8, strict TypeScript and Tailwind CSS 4. The corpus screen queries the catalog and the selected abstract through Axios, validates the responses with Zod and shows the backend's real capabilities. It does not run analyses or compute frequencies or algorithms in JavaScript.
+Local SPA with React 19, Vite 8, strict TypeScript and Tailwind CSS 4. The corpus screen queries the catalog and the selected abstract through Axios, validates the responses with Zod and displays the original text. It does not run analyses or compute frequencies or algorithms in JavaScript.
 
 ## Requirements and scope
 
@@ -50,7 +50,7 @@ Loading prevents duplicate submissions. Failures clear prior results and show fi
 
 ## Reader components
 
-The reader uses the NativeSelect, Card, Badge and Alert components from [Cojeev UI](https://cojeev.com/ui/docs/), located in `src/shared/{ui,lib}/`; the theme and the local DM Sans and Bricolage Grotesque fonts are global. The selection is a native `select` with twenty options in catalog order, and an error or a selection change never presents the previous result as current. The Cojeev (MIT) and font (OFL) licenses are served from the footer.
+The reader uses the NativeSelect, Card, Badge and Alert components from [Cojeev UI](https://cojeev.com/ui/docs/), located in `src/shared/{ui,lib}/`; the theme and the local DM Sans and Bricolage Grotesque fonts are global. The selection is a native `select` with twenty options in catalog order, and an error or a selection change never presents the previous result as current. The Cojeev (MIT) and font (OFL) license texts are included in the build output under `licenses/`.
 
 ## Local development
 
@@ -113,7 +113,7 @@ docker run --rm --network=host \
 - `nginx/`: static server template.
 - `scripts/check-container.mjs`: HTTP check of the already started image.
 
-The catalog is shown only if it contains exactly 20 unique IDs, six unique supported methods and consistent availabilities. The detail must match the selected ID; the original text is kept and rendered as text, never HTML. Changing or clearing the selection discards the previous detail and aborts its request; stale responses do not update the screen. Errors are shown without private details or previous data presented as a current success. Capabilities are informational, even when the backend declares one as available.
+The catalog is shown only if it contains exactly 20 unique IDs. The detail must match the selected ID; the original text is kept and rendered as text, never HTML. Changing or clearing the selection discards the previous detail and aborts its request; stale responses do not update the screen. Errors are shown without private details or previous data presented as a current success.
 
 The tests use only 20 new synthetic records per case and a mocked network; they contain no real abstracts. They cover invariants, errors, loading, selection, out-of-order responses and shell regressions (brand, main landmark and explicit navigation). Health and preparation are the backend's responsibility: this screen does not infer their state from liveness.
 
