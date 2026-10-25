@@ -1,9 +1,6 @@
 import { useRef, useState } from 'react';
 import { Ranking } from '../features/ranking';
 import { Corpus } from '../features/corpus';
-import cojeevLicense from '../../licenses/cojeev/LICENCE?url&no-inline';
-import dmSansLicense from '../styles/fonts/DMSans-OFL.txt?url&no-inline';
-import bricolageLicense from '../styles/fonts/BricolageGrotesque-OFL.txt?url&no-inline';
 
 export default function App() {
   const [view, setView] = useState<'corpus' | 'ranking'>('corpus');
@@ -45,15 +42,6 @@ export default function App() {
           {view === 'ranking' && <Ranking />}
         </div>
       </main>
-
-      <footer className="workspace-footer">
-        <p>Local development foundation</p>
-        <nav aria-label="Third-party licenses">
-          <a href={cojeevLicense}>Cojeev UI license</a>
-          <a href={dmSansLicense}>DM Sans license</a>
-          <a href={bricolageLicense}>Bricolage Grotesque license</a>
-        </nav>
-      </footer>
     </div>
   );
 }

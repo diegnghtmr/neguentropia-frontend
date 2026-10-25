@@ -9,14 +9,6 @@ export function syntheticCatalog(): PaperCatalog {
       title: `Synthetic paper ${index + 1}`,
       authors: ['Synthetic Author'],
     })),
-    capabilities: {
-      ranking: { available: false, blockedReason: 'NOT_IMPLEMENTED' },
-      clustering: { available: false, blockedReason: 'NOT_IMPLEMENTED' },
-      search: { available: false, blockedReason: 'NOT_IMPLEMENTED' },
-      similarity: (['levenshtein', 'lcs', 'tf-idf-cosine', 'jaccard', 'gemini-embeddings', 'local-embeddings'] as const).map((method) => ({
-        method, availability: { available: false, blockedReason: 'NOT_IMPLEMENTED' },
-      })),
-    },
   };
 }
 

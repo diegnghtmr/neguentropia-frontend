@@ -84,22 +84,6 @@ describe('Corpus screen', () => {
     expect(screen.getByRole('article').querySelector('p')).toHaveTextContent('Synthetic Author');
     expect(screen.getByRole('heading', { name: syntheticDetail().title, level: 3 })).toHaveAttribute('id', 'paper-title');
   });
-  it('shows actual capability states as information, never analysis buttons', async () => {
-    const data = syntheticCatalog();
-    render(<Corpus />);
-    await screen.findByRole('combobox');
-    expect(screen.getByRole('heading', { name: 'Capabilities' })).toBeVisible();
-    for (const capability of data.capabilities.similarity) expect(screen.getByText(capability.method)).toBeVisible();
-    expect(screen.getAllByText(/Not implemented/i)).toHaveLength(9);
-    expect(screen.queryByRole('button', { name: /rank|compare|cluster|search|generate/i })).not.toBeInTheDocument();
-  });
-  it('renders available capability honestly without enabling analyses', async () => {
-    const data = syntheticCatalog();
-    catalogRequest.mockResolvedValue({ ...data, capabilities: { ...data.capabilities, ranking: { available: true, blockedReason: null } } });
-    render(<Corpus />);
-    expect(await screen.findByText('Available')).toBeVisible();
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
-  });
   it('distinguishes corpus unavailable from a generic catalog failure', async () => {
     catalogRequest.mockRejectedValue(new AxiosError('503', undefined, undefined, undefined, {
       data: { code: 'CORPUS_UNAVAILABLE', message: 'Corpus unavailable.' }, status: 503, statusText: 'Unavailable', headers: {}, config: { headers: {} } as never,

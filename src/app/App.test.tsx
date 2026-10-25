@@ -10,6 +10,7 @@ describe('application workspace', () => {
     render(<App />);
     expect(screen.getByRole('heading', { level: 1, name: 'Neguentropía' })).toBeVisible();
     expect(screen.getByRole('main')).toHaveAccessibleName('Workspace');
+    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
     expect(screen.getByText('Read the corpus or run a ranking.')).toBeVisible();
     expect(screen.getByRole('tab', { name: 'Corpus' })).toHaveAttribute('aria-selected', 'true');
   });

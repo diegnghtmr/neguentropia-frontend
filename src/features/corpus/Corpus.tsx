@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { z } from 'zod';
 import { loadCatalog, loadDetail } from './client';
-import type { Availability, PaperCatalog, PaperDetail } from './schemas';
+import type { PaperCatalog, PaperDetail } from './schemas';
 import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
 import { Badge } from '@/shared/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/shared/ui/card';
@@ -22,20 +22,6 @@ function errorMessage(error: unknown, subject: 'corpus' | 'abstract') {
   }
   return `Could not load ${subject}. Check the backend connection and configuration, then reload the page.`;
 }
-const reasonLabels: Record<Exclude<Availability['blockedReason'], null>, string> = {
-  NOT_IMPLEMENTED: 'Not implemented',
-  CORPUS_UNAVAILABLE: 'Corpus unavailable',
-  PROVIDER_UNAVAILABLE: 'Provider unavailable',
-  TOKEN_COUNT_UNVERIFIED: 'Token count unverified',
-  LENGTH_LIMIT_EXCEEDED: 'Length limit exceeded',
-  PERMISSION_UNVERIFIED: 'Permission unverified',
-  COST_PROTECTION_UNVERIFIED: 'Cost protection unverified',
-  MODEL_CONFIGURATION_UNVERIFIED: 'Model configuration unverified',
-};
-function availabilityLabel(availability: Availability) {
-  return availability.available ? 'Available' : `Unavailable — ${reasonLabels[availability.blockedReason]}`;
-}
-
 export function Corpus() {
   const [catalog, setCatalog] = useState<LoadState<PaperCatalog>>({ state: 'loading' });
   const [selectedId, setSelectedId] = useState('');
@@ -72,16 +58,6 @@ export function Corpus() {
             {selectedId ? <PaperReader key={selectedId} id={selectedId} /> : <Card variant="cream" className="corpus-empty"><p>Select a paper to read its original abstract.</p></Card>}
           </div>
         </div>
-        <section aria-labelledby="capabilities-heading" className="corpus-capabilities">
-          <div className="corpus-capabilities-intro">
-            <h3 id="capabilities-heading">Capabilities</h3>
-            <p className="corpus-muted">Informative backend availability only; this screen does not run analyses or authorize text transfers.</p>
-          </div>
-          <dl className="corpus-capability-list">
-            {(['ranking', 'clustering', 'search'] as const).map((name) => <div key={name}><dt className="capitalize">{name}</dt><dd>{availabilityLabel(catalog.data.capabilities[name])}</dd></div>)}
-            {catalog.data.capabilities.similarity.map(({ method, availability }) => <div key={method}><dt>{method}</dt><dd>{availabilityLabel(availability)}</dd></div>)}
-          </dl>
-        </section>
       </>}
     </section>
   );
