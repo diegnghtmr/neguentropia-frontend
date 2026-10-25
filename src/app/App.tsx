@@ -25,8 +25,8 @@ export default function App() {
           <TabsContent value="corpus" forceMount hidden={view !== 'corpus'}>
             <Corpus />
           </TabsContent>
-          <TabsContent value="ranking">
-            <Ranking />
+          <TabsContent value="ranking" forceMount hidden={view !== 'ranking'}>
+            {view === 'ranking' && <Ranking />}
           </TabsContent>
         </Tabs>
       </main>

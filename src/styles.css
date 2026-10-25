@@ -139,6 +139,8 @@ body { min-width: 20rem; }
   .corpus-catalog { --card-pad: var(--s-5); --r-card: var(--r-panel); }
 }
 [role="tabpanel"][hidden] { display: none; }
+[data-slot="tabs-content"]:not([hidden]) { animation: workspace-view-in 180ms ease-out; }
+@keyframes workspace-view-in { from { opacity: 0; } to { opacity: 1; } }
 .ranking-controls p { font-size: var(--fs-small); max-width: 60ch; }
 .ranking-output { display: grid; gap: var(--s-6); min-width: 0; }
 .ranking-summary, .ranking-result { border: 1px solid var(--border); min-width: 0; }
