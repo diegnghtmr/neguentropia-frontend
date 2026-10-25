@@ -9,6 +9,7 @@ import { Field, FieldLabel, FieldDescription } from '@/shared/ui/field';
 import { Button } from '@/shared/ui/button';
 import { Empty, EmptyDescription } from '@/shared/ui/empty';
 import { Spinner, SpinnerLabel } from '@/shared/ui/spinner';
+import { MotionPresence, MotionSurface } from '@/shared/ui/presence';
 import { Stats, Stat, Label } from '@/shared/ui/label';
 import { TableContainer, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCaption } from '@/shared/ui/table';
 import { loadRanking } from './client';
@@ -29,6 +30,12 @@ function errorMessage(error: unknown) {
 
 export function Ranking() {
   const [state, setState] = useState<State>({ status: 'idle' });
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (state.status !== 'loading') return;
+    const timer = setTimeout(() => setSlow(true), 300);
+    return () => { clearTimeout(timer); setSlow(false); };
+  }, [state.status]);
   const active = useRef<AbortController | null>(null);
   useEffect(() => () => { active.current?.abort(); }, []);
   async function run() {
@@ -70,23 +77,27 @@ export function Ranking() {
           <p>Java single-run timing; not a benchmark. Sorting only: excludes preparation, counting, statistics, common copies and top-term selection.</p>
         </Card>
         <div className="ranking-output" aria-busy={state.status === 'loading'}>
-          {state.status === 'idle' && <Empty><EmptyDescription>No ranking has been run.</EmptyDescription></Empty>}
-          {state.status === 'loading' && <RankingFeedback message="Running ranking…" />}
-          {state.status === 'error' && <RankingFeedback error message={state.message} />}
-          {state.status === 'ready' && <RankingResults data={state.data} />}
+          <MotionPresence mode="wait">
+            {state.status === 'idle' && <MotionSurface key="idle" preset="soften" exitDuration={0.2}><Empty><EmptyDescription>No ranking has been run.</EmptyDescription></Empty></MotionSurface>}
+            {state.status === 'loading' && slow && <RankingFeedback key="loading" message="Running ranking…" />}
+            {state.status === 'error' && <RankingFeedback key="error" error message={state.message} />}
+            {state.status === 'ready' && <RankingResults key="ready" data={state.data} />}
+          </MotionPresence>
         </div>
       </div>
     </section>
   );
 }
 function RankingFeedback({ message, error = false }: { message: string; error?: boolean }) {
-  if (!error) return <div className="corpus-feedback"><Spinner label={message} /><SpinnerLabel aria-hidden="true">{message}</SpinnerLabel></div>;
-  return <Alert role="alert" variant="danger" presentation="note">
-    <AlertBody className="col-span-full">
-      <AlertTitle>Unable to rank</AlertTitle>
-      <AlertDescription>{message}</AlertDescription>
-    </AlertBody>
-  </Alert>;
+  if (!error) return <MotionSurface preset="fade" className="corpus-feedback"><Spinner label={message} /><SpinnerLabel aria-hidden="true">{message}</SpinnerLabel></MotionSurface>;
+  return <MotionSurface preset="soften" exitDuration={0.2}>
+    <Alert role="alert" variant="danger" presentation="note">
+      <AlertBody className="col-span-full">
+        <AlertTitle>Unable to rank</AlertTitle>
+        <AlertDescription>{message}</AlertDescription>
+      </AlertBody>
+    </Alert>
+  </MotionSurface>;
 }
 function RankingResults({ data }: { data: RankingResponse }) {
   const metadata = [
@@ -96,15 +107,15 @@ function RankingResults({ data }: { data: RankingResponse }) {
     ['Radix base', data.parameters.radixBase], ['Bucket strategy', data.parameters.bucketStrategy],
     ['Bucket count', data.parameters.bucketCount], ['Bucket width', data.parameters.bucketWidth],
   ] as const;
-  return <>
-    <Card className="ranking-summary">
+  return <div className="ranking-output">
+    <MotionSurface preset="soften" exitDuration={0.2}><Card className="ranking-summary">
       <CardHeader><CardTitle>Run details</CardTitle></CardHeader>
       <CardContent>
         <Stats as="dl" className="ranking-metadata">{metadata.map(([label, value]) => <Stat key={label}><Label as="dt">{label}</Label><dd>{value}</dd></Stat>)}</Stats>
         <p className="corpus-muted">NFC · Locale.ROOT lowercase · Unicode letter/mark/digit runs with a letter · No stopword removal or stemming · Manifest order · First-occurrence ties.</p>
       </CardContent>
-    </Card>
-    {data.results.map((result) => <Card key={result.method} className="ranking-result">
+    </Card></MotionSurface>
+    {data.results.map((result, index) => <MotionSurface key={result.method} preset="soften" delay={0.07 * (index + 1)} exitDuration={0.2}><Card className="ranking-result">
       <CardHeader>
         <CardTitle>{methodLabels[result.method]}</CardTitle>
         <p>Sort duration: <strong>{result.sortMilliseconds} ms</strong></p>
@@ -119,6 +130,6 @@ function RankingResults({ data }: { data: RankingResponse }) {
         </TableContainer>
         {result.topTerms.length === 0 && <p>No terms were returned.</p>}
       </CardContent>
-    </Card>)}
-  </>;
+    </Card></MotionSurface>)}
+  </div>;
 }

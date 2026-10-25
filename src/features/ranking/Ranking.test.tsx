@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { AxiosError, AxiosHeaders } from 'axios';
 import { ZodError } from 'zod';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Ranking } from './Ranking';
 import { loadRanking } from './client';
 import { rankingSchema } from './schemas';
@@ -11,13 +11,7 @@ vi.mock('./client', () => ({ loadRanking: vi.fn() }));
 const load = vi.mocked(loadRanking);
 beforeEach(() => {
   load.mockReset();
-  vi.stubGlobal('matchMedia', vi.fn((query: string) => ({
-    matches: false, media: query, onchange: null,
-    addListener: vi.fn(), removeListener: vi.fn(),
-    addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn(() => true),
-  })));
 });
-afterEach(() => vi.unstubAllGlobals());
 function httpError(status: number) {
   return new AxiosError('private server text', undefined, undefined, undefined, {
     status, statusText: 'private', data: { message: 'private server text' }, headers: {},
@@ -42,12 +36,12 @@ describe('Ranking screen', () => {
     expect(load).not.toHaveBeenCalled();
     expect(screen.getByText('No ranking has been run.')).toBeVisible();
     run();
-    expect(screen.getByRole('status', { name: 'Running ranking…' })).toBeInTheDocument();
+    expect(await screen.findByRole('status', { name: 'Running ranking…' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Run ranking' })).toHaveAttribute('aria-busy', 'true');
     expect(screen.getByRole('button', { name: 'Run ranking' })).toHaveAttribute('aria-disabled', 'true');
     run(); expect(load).toHaveBeenCalledTimes(1);
     await act(async () => { resolve(rankingSchema.parse(rankingFixture())); });
-    expect(screen.getAllByRole('table')).toHaveLength(3);
+    expect(await screen.findAllByRole('table')).toHaveLength(3);
   });
   it('renders received order, Unicode, frequencies, parameters and exact Java timing', async () => {
     load.mockResolvedValue(rankingSchema.parse(rankingFixture()));

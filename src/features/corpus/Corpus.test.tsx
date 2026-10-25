@@ -1,5 +1,5 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AxiosError } from 'axios';
 import { Corpus } from './Corpus';
 import { loadCatalog, loadDetail } from './client';
@@ -29,17 +29,10 @@ async function select(id = 'synthetic-1') {
 }
 beforeEach(() => {
   vi.resetAllMocks();
-  // jsdom has no media-query implementation; exercise real component hooks with a static browser preference.
-  vi.stubGlobal('matchMedia', vi.fn((query: string) => ({
-    matches: false, media: query, onchange: null,
-    addListener: vi.fn(), removeListener: vi.fn(),
-    addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn(() => true),
-  })));
   catalogRequest.mockResolvedValue(syntheticCatalog());
   detailRequest.mockImplementation(async (id) => syntheticDetail(id));
 });
 
-afterEach(() => vi.unstubAllGlobals());
 
 describe('Corpus screen', () => {
   it('announces loading before showing an ordered, complete catalog', async () => {
@@ -115,11 +108,11 @@ describe('Corpus screen', () => {
     await select();
     await screen.findByTestId('original-abstract');
     await select('synthetic-2');
-    expect(screen.queryByTestId('original-abstract')).not.toBeInTheDocument();
-    expect(screen.getByRole('status', { name: 'Loading abstract…' })).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByTestId('original-abstract')).not.toBeInTheDocument());
+    expect(await screen.findByRole('status', { name: 'Loading abstract…' })).toBeInTheDocument();
     await select('synthetic-3');
     await act(async () => { third.reject(new Error('unavailable')); });
-    expect(screen.getByRole('alert')).toHaveTextContent('Could not load abstract');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not load abstract');
     await act(async () => { second.resolve(syntheticDetail('synthetic-2')); });
     expect(screen.queryByTestId('original-abstract')).not.toBeInTheDocument();
     expect(screen.getByRole('alert')).toBeVisible();
