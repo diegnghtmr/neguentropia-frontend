@@ -39,7 +39,6 @@
 @import "@/styles/cojeev/field.css";
 @import "@/styles/cojeev/tabs.css";
 @import "@/styles/cojeev/empty.css";
-@import "@/styles/cojeev/skeleton.css";
 
 @custom-variant dark (&:is(.dark *));
 
