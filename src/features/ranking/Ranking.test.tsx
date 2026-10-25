@@ -26,6 +26,15 @@ function httpError(status: number) {
 }
 function run() { fireEvent.click(screen.getByRole('button', { name: 'Run ranking' })); }
 describe('Ranking screen', () => {
+  it('keeps the labelled Cojeev scope selector disabled', () => {
+    render(<Ranking />);
+    const scope = screen.getByRole('combobox', { name: 'Analysis scope' });
+    expect(scope).toHaveAttribute('data-slot', 'select-trigger');
+    expect(scope).toBeDisabled();
+    expect(scope).toHaveTextContent('All 20 abstracts');
+    fireEvent.keyDown(scope, { key: 'ArrowDown' });
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
   it('stays idle until explicitly requested and blocks duplicate submissions', async () => {
     let resolve!: (value: ReturnType<typeof rankingSchema.parse>) => void;
     load.mockReturnValue(new Promise((done) => { resolve = done; }));

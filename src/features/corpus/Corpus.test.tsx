@@ -14,8 +14,18 @@ function deferred<T>() {
   const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; });
   return { promise, resolve, reject };
 }
+async function openSelection() {
+  const trigger = await screen.findByRole('combobox', { name: 'Paper' });
+  trigger.focus();
+  fireEvent.keyDown(trigger, { key: 'ArrowDown' });
+  return screen.findByRole('listbox');
+}
 async function select(id = 'synthetic-1') {
-  fireEvent.change(await screen.findByRole('combobox', { name: 'Paper' }), { target: { value: id } });
+  await openSelection();
+  const title = syntheticCatalog().papers.find((paper) => paper.id === id)!.title;
+  const option = await screen.findByRole('option', { name: title });
+  option.focus();
+  fireEvent.keyDown(option, { key: 'Enter' });
 }
 beforeEach(() => {
   vi.resetAllMocks();
@@ -41,29 +51,28 @@ describe('Corpus screen', () => {
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
     await act(async () => { request.resolve(syntheticCatalog()); });
     expect(screen.queryByText(/Corpus version/)).not.toBeInTheDocument();
+    await openSelection();
     const options = screen.getAllByRole('option');
-    expect(options.slice(1).map((option) => option.getAttribute('value'))).toEqual(syntheticCatalog().papers.map((paper) => paper.id));
+    expect(options).toHaveLength(20);
+    expect(options.map((option) => option.textContent)).toEqual(syntheticCatalog().papers.map((paper) => paper.title));
     expect(detailRequest).not.toHaveBeenCalled();
   });
-  it('renders the reader with Cojeev primitives while retaining the native selection contract', async () => {
+  it('renders the reader with a labelled Cojeev Select and keyboard selection', async () => {
     const { container } = render(<Corpus />);
     const selection = await screen.findByRole('combobox', { name: 'Paper' });
     selection.focus();
     expect(selection).toHaveFocus();
-    expect(selection.tagName).toBe('SELECT');
-    expect(selection).toHaveAttribute('data-slot', 'native-select');
-    expect(screen.getByRole('option', { name: 'Choose a paper' })).toHaveAttribute('data-slot', 'native-select-option');
-    expect(screen.getAllByRole('option')).toHaveLength(21);
+    expect(selection.tagName).toBe('BUTTON');
+    expect(selection).toHaveAttribute('data-slot', 'select-trigger');
+    expect(selection).toHaveTextContent('Choose a paper');
     expect(screen.getByText(/Corpus ready/)).toHaveAttribute('data-slot', 'badge');
     await select();
     const abstract = await screen.findByTestId('original-abstract');
     expect(abstract.closest('[data-slot="card-content"]')).not.toBeNull();
-    expect(selection).toHaveFocus();
+    expect(selection).toHaveTextContent(syntheticCatalog().papers[0]!.title);
     expect(container.querySelector('svg.v-morph')).toBeNull();
     expect(screen.getByRole('heading', { name: syntheticDetail().title }).closest('[data-slot="card"]')).not.toBeNull();
-    await select('');
-    expect(selection).toHaveValue('');
-    expect(screen.queryByTestId('original-abstract')).not.toBeInTheDocument();
+
   });
   it('uses an inline Cojeev alert for sanitized failure, not a dismissible notification', async () => {
     catalogRequest.mockRejectedValue(new Error('/private/path secret'));
@@ -116,7 +125,7 @@ describe('Corpus screen', () => {
     expect(screen.queryByTestId('original-abstract')).not.toBeInTheDocument();
     expect(screen.getByRole('alert')).toBeVisible();
   });
-  it('ignores stale errors and clears detail when selection is reset', async () => {
+  it('ignores stale errors after another paper is selected', async () => {
     const first = deferred<ReturnType<typeof syntheticDetail>>();
     detailRequest.mockImplementation((id) => id === 'synthetic-1' ? first.promise : Promise.resolve(syntheticDetail(id)));
     render(<Corpus />);
@@ -125,8 +134,7 @@ describe('Corpus screen', () => {
     await screen.findByTestId('original-abstract');
     await act(async () => { first.reject(new Error('stale failure')); });
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    await select('');
-    expect(screen.queryByTestId('original-abstract')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: syntheticDetail('synthetic-2').title })).toBeVisible();
   });
   it('aborts in-flight catalog on unmount', () => {
     catalogRequest.mockReturnValue(new Promise(() => {}));

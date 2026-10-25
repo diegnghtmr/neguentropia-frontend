@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Badge } from '@/shared/ui/badge';
 import { Alert, AlertBody, AlertTitle, AlertDescription } from '@/shared/ui/alert';
-import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/select';
 import { loadRanking } from './client';
 import type { RankingResponse } from './schemas';
 
@@ -50,9 +50,14 @@ export function Ranking() {
           <Badge variant="olive">Counting · Radix · Bucket</Badge>
           <div className="corpus-selection">
             <label htmlFor="ranking-scope">Analysis scope</label>
-            <NativeSelect id="ranking-scope" value="all-20-abstracts" disabled radius="soft" appearance="contour" className="w-full">
-              <NativeSelectOption value="all-20-abstracts">All 20 abstracts</NativeSelectOption>
-            </NativeSelect>
+            <Select value="all-20-abstracts" disabled>
+              <SelectTrigger id="ranking-scope" radius="soft" appearance="contour" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all-20-abstracts">All 20 abstracts</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <p>Fixed scope. Titles, authors and other sections are excluded.</p>
           <button type="button" className="workspace-action" disabled={state.status === 'loading'} onClick={() => { void run(); }}>Run ranking</button>

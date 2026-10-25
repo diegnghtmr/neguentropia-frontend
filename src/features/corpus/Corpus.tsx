@@ -3,7 +3,7 @@ import axios from 'axios';
 import { z } from 'zod';
 import { loadCatalog, loadDetail } from './client';
 import type { PaperCatalog, PaperDetail } from './schemas';
-import { NativeSelect, NativeSelectOption } from '@/shared/ui/native-select';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/select';
 import { Badge } from '@/shared/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/shared/ui/card';
 import { Alert, AlertBody, AlertTitle, AlertDescription } from '@/shared/ui/alert';
@@ -48,10 +48,14 @@ export function Corpus() {
             <Badge variant="olive">Corpus ready · {catalog.data.papers.length} papers</Badge>
             <div className="corpus-selection">
               <label htmlFor="paper-selection">Paper</label>
-              <NativeSelect id="paper-selection" value={selectedId} onChange={(event) => setSelectedId(event.target.value)} radius="soft" appearance="contour" className="w-full">
-                <NativeSelectOption value="">Choose a paper</NativeSelectOption>
-                {catalog.data.papers.map((paper) => <NativeSelectOption key={paper.id} value={paper.id}>{paper.title}</NativeSelectOption>)}
-              </NativeSelect>
+              <Select value={selectedId} onValueChange={setSelectedId}>
+                <SelectTrigger id="paper-selection" radius="soft" appearance="contour" className="w-full">
+                  <SelectValue placeholder="Choose a paper" />
+                </SelectTrigger>
+                <SelectContent>
+                  {catalog.data.papers.map((paper) => <SelectItem key={paper.id} value={paper.id}>{paper.title}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           </Card>
           <div className="corpus-reading">
