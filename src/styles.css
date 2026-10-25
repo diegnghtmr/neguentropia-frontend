@@ -138,6 +138,9 @@ body { min-width: 20rem; }
   .corpus-layout { grid-template-columns: 17rem minmax(0, 1fr); gap: var(--s-10); }
   .corpus-catalog { --card-pad: var(--s-5); --r-card: var(--r-panel); }
 }
+html { scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
+[data-slot="select-content"] [data-slot="scroll-area-scrollbar"] { display: none; }
 [role="tabpanel"][hidden] { display: none; }
 [data-slot="tabs-content"]:not([hidden]) { animation: workspace-view-in 180ms ease-out; }
 @keyframes workspace-view-in { from { opacity: 0; } to { opacity: 1; } }
