@@ -67,6 +67,13 @@
 }
 :root [data-slot="field"][data-appearance][data-state="error"] [role="alert"] { color: var(--v-danger-ink); }
 
+.v-form-example { display: grid; gap: var(--s-5); width: 100%; min-width: 0; max-width: 480px; margin-inline: auto; }
+.v-form-example__intro { display: grid; gap: var(--s-1); }
+.v-form-example__intro strong { font-family: var(--font-display, inherit); font-size: var(--fs-title); font-weight: var(--fw-medium); }
+.v-form-example__intro p { margin: 0; color: var(--v-text-2); font-size: var(--fs-small); line-height: 1.5; }
+.v-form-example__status { min-height: 1.5em; margin: 0; font-size: var(--fs-meta); color: var(--v-text-2); overflow-wrap: anywhere; }
+.v-form-example__footer { display: flex; gap: var(--s-3); align-items: center; justify-content: space-between; }
+
 /* Composer owns one surface, while the actual textarea keeps native editing. */
 :root .v-composer[data-appearance] { border-radius:min(var(--v-control-radius,20px),20px); background:var(--v-canvas); color:var(--v-text); box-shadow:inset 0 0 0 1px var(--v-edge); }
 :root .v-composer[data-appearance="inset"] { background:var(--v-beige); box-shadow:inset 0 1px 2px color-mix(in oklab,var(--v-text) 12%,transparent); }
@@ -76,6 +83,16 @@
 :root [data-slot="field"][data-appearance] [data-slot="input-group"] .v-textarea { background:transparent; box-shadow:none; outline:0; border:0; border-radius:0; }
 :root .v-composer[data-appearance]:focus-within { outline:2px solid var(--v-brand); outline-offset:3px; }
 :root [data-slot="field"][data-appearance="inset"] .v-composer[data-appearance] { background:transparent; box-shadow:none; outline:0; }
+.v-form-example[data-form-example="field"] { max-width:600px; }
+.v-form-example [data-slot="field-label"] { font-size:var(--fs-control); line-height:1.5; }
+.v-form-example [data-slot="field-description"] { font-size:var(--fs-small); margin:0; }
+.v-form-example__footer > .v-btn, .v-form-example [data-slot="textarea-composer-bar"] > .v-btn { min-height:44px; }
+.v-form-example [data-slot="textarea-composer-bar"] { justify-content:space-between; flex-wrap:wrap; gap:var(--s-3); padding:var(--s-3) var(--s-3); border-top:1px solid var(--v-border); }
+.v-form-example__allowance { height:4px; border-radius:var(--r-xs); overflow:hidden; background:var(--v-beige); margin-top:-8px; }
+.v-form-example__allowance > span { display:block; height:100%; max-width:100%; border-radius:inherit; background:var(--v-blue-deep); }
+.v-form-example__label-row { display:flex; align-items:baseline; flex-wrap:wrap; gap:var(--s-2); justify-content:space-between; }
+.v-form-example__label-row > span { font-size:var(--fs-meta); color:var(--v-text-2); }
+.v-form-example__hint { margin:0; color:var(--v-text-2); font-size:var(--fs-small); line-height:1.5; }
 /* Editorial draws only the focus edge: no moving caret, label or hit area. */
 :root [data-appearance="editorial"]:is(.v-input,.v-igroup,.v-textarea,.v-composer),
 :root [data-slot="field"][data-appearance="editorial"] :is(.v-input,.v-igroup,.v-textarea):not([data-appearance]) {

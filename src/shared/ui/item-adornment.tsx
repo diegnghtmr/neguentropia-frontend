@@ -44,7 +44,7 @@ export function resolveItemAdornment(identity: string) {
   let hash = 2166136261;
   for (const character of identity) hash = Math.imul(hash ^ character.codePointAt(0)!, 16777619) >>> 0;
   return {
-    shape: signatureShapeNames[hash % signatureShapeNames.length] ?? "daisy-12",
+    shape: signatureShapeNames[hash % signatureShapeNames.length],
     color: colors[(hash >>> 8) % colors.length],
     icon: namedGlyphs.find(([pattern]) => pattern.test(identity))?.[1] ?? glyphs[(hash >>> 16) % glyphs.length],
   };
@@ -98,7 +98,7 @@ export function adornItem(children: React.ReactNode, adornment: ItemAdornmentVal
   }
   // Existing explicitly composed icons remain the consumer's custom adornment.
   const hasVisual = hasItemVisual(children);
-  return <>{(!hasVisual || adornment !== undefined) && <ItemAdornment identity={identity || itemText(children)} {...(adornment === undefined ? {} : { value: adornment })} />}{children}{trailing}</>;
+  return <>{(!hasVisual || adornment !== undefined) && <ItemAdornment identity={identity || itemText(children)} value={adornment} />}{children}{trailing}</>;
 }
 
 /** Keep native-child and precomposed-icon handling while simplifying menu rows. */

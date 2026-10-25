@@ -10,7 +10,7 @@ const SPECIAL:[string,string,string|null][]=[['.v-menu','.v-menu__item',null],['
 const ITEMS='button,[role="tab"],label,.v-nav__item,.v-item,[role="radio"]'
 export const FLOW_FIELD_ITEMS='.v-input,.v-textarea,.v-igroup,.v-native,.v-otp input'
 const ACTIVE='[aria-selected="true"],[aria-pressed="true"],[aria-checked="true"],[aria-current="page"],[aria-current="true"],[aria-current="step"],.-on,.-selected,label:has(input:checked),[data-state="active"],[data-state="on"],[data-state="checked"]'
-const LAYERS=['v-glide__pill','v-glide__hover','v-glide__trail'] as const
+const LAYERS=['v-glide__pill','v-glide__hover','v-glide__trail']
 const PHASES=['-phase1','-gather','-shoot','-lead','-land']
 type Box={x:number;y:number;w:number;h:number;r:string}
 type Group={element:HTMLElement;place:(animate?:boolean)=>void;resolve:()=>void;dispose:()=>void}
@@ -59,7 +59,7 @@ export function attachFlowGroup(g:HTMLElement,options:FlowGroupOptions={}):()=>v
  }
  const items=(visible=true)=>all(itemSel,g).filter(item=>owned(item)&&(!visible||item.getClientRects().length>0))
  const mk=(className:string)=>{const span=document.createElement('span');span.className=className;span.setAttribute('aria-hidden','true');span.append(document.createElement('i'));return span}
- const pill=mk(LAYERS[0]),hov=mk(LAYERS[1]),trail=mk(LAYERS[2]),timers=new Set<MotionTimer>(),painter=createFlowPainter(write)
+ const [pill,hov,trail]=LAYERS.map(mk),timers=new Set<MotionTimer>(),painter=createFlowPainter(write)
  let cancelLanding=()=>{}
  const stopMovement=()=>{painter.stop(false);cancelLanding();cancelLanding=()=>{}}
  let prev:Box|null=null,lastActive:HTMLElement|null=null,dScale=1,queued:MotionTimer|null=null,resizeTimer:MotionTimer|null=null,stillTimer:MotionTimer|null=null,disposed=false,attached=false,reseat=false,initial=true,inView=true
@@ -164,7 +164,7 @@ export function attachFlowGroup(g:HTMLElement,options:FlowGroupOptions={}):()=>v
  const ancestor=new MutationObserver(resolve)
  for(let parent=g.parentElement;parent;parent=parent.parentElement)ancestor.observe(parent,{attributes:true,attributeFilter:['data-flow','data-no-glide','hidden','open','data-state']})
  const ro=new ResizeObserver(()=>{if(!resizeTimer)resizeTimer=scheduleMotion(()=>{resizeTimer=null;place(false)},16)});ro.observe(g)
- const visibility=new IntersectionObserver(([entry])=>{inView=entry?.isIntersecting??false;if(!inView){clearPhases();if(prev)painter.paint(prev,false,true,variantFor(g));painter.hide(true,true)}else place(false)},{threshold:0});visibility.observe(g)
+ const visibility=new IntersectionObserver(([entry])=>{inView=entry.isIntersecting;if(!inView){clearPhases();if(prev)painter.paint(prev,false,true,variantFor(g));painter.hide(true,true)}else place(false)},{threshold:0});visibility.observe(g)
  function dispose(){if(disposed)return;disposed=true;groups.delete(g);ac.abort();mo.disconnect();ancestor.disconnect();ro.disconnect();visibility.disconnect();cancelMotion(queued);cancelMotion(resizeTimer);cancelMotion(stillTimer);clearPhases();painter.dispose();[pill,hov,trail].forEach(layer=>layer.remove());unmark()
   if(!oldClasses.has('v-glide'))g.classList.remove('v-glide');g.removeAttribute('data-flow-still')
   for(const [name,value]of oldAttrs){if(value===null)g.removeAttribute(name);else g.setAttribute(name,value)}
@@ -225,7 +225,7 @@ export function createFlowPresence(el:HTMLElement,grow:boolean|'fade'|FlowSlideM
     // Removing the CSS sentinel under quiet mode can cancel its end event.
     // Finish every Radix surface's retained exit, not only sliding drawers,
     // even while the document clock is suspended.
-    if(!disposed&&!opened&&el.isConnected)el.dispatchEvent(new AnimationEvent('animationend',{animationName:(getComputedStyle(el).animationName.split(',')[0]??'').trim(),bubbles:true}))
+    if(!disposed&&!opened&&el.isConnected)el.dispatchEvent(new AnimationEvent('animationend',{animationName:getComputedStyle(el).animationName.split(',')[0].trim(),bubbles:true}))
    })
    return
   }

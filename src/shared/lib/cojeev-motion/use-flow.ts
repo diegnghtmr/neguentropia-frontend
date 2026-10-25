@@ -1,4 +1,3 @@
-"use client"
 import * as React from "react"
 import { assignMotionRef } from "@/shared/lib/cojeev-motion/refs"
 import { acquireFlowEnvironment, createFlowPresence, attachFlowGroup, isFlowQuiet, replaceFlow, type FlowGroupOptions, type FlowSlideMode } from "@/shared/lib/cojeev-motion/flow"
@@ -9,7 +8,7 @@ export function useFlowGroup<T extends HTMLElement>(externalRef?:React.Ref<T>,op
  return React.useCallback((el:T|null)=>{
   const releaseRef=assignMotionRef(externalRef,el)
   if(!el)return
-  const cleanup=attachFlowGroup(el,{...(kind===undefined?{}:{kind}),...(itemSelector===undefined?{}:{itemSelector}),...(activeSelector===undefined?{}:{activeSelector})})
+  const cleanup=attachFlowGroup(el,{kind,itemSelector,activeSelector})
   return ()=>{cleanup();releaseRef()}
  },[externalRef,kind,itemSelector,activeSelector])
 }

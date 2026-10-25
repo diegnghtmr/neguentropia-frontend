@@ -22,7 +22,7 @@ export function useMotionVisibility(ref: React.RefObject<Element | null>, mounte
   React.useEffect(() => {
     const element = mountedElement ?? ref.current;
     if (!element) { setInView(false); return; }
-    const observer = new IntersectionObserver(([entry]) => setInView(entry?.isIntersecting ?? false), { threshold: 0.1 });
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.1 });
     observer.observe(element);
     return () => observer.disconnect();
   }, [ref, mountedElement]);

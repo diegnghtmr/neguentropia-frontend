@@ -51,8 +51,8 @@ export function Ranking() {
           <div className="corpus-selection">
             <label htmlFor="ranking-scope">Analysis scope</label>
             <Select value="all-20-abstracts" disabled>
-              <SelectTrigger id="ranking-scope" radius="soft" appearance="contour" className="w-full">
-                <SelectValue />
+              <SelectTrigger id="ranking-scope" radius="soft" appearance="contour" className="-block">
+                <span><SelectValue /></span>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all-20-abstracts">All 20 abstracts</SelectItem>

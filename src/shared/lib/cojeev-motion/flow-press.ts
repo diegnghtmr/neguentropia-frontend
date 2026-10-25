@@ -1,4 +1,3 @@
-"use client"
 import * as React from "react"
 import { acquireFlowEnvironment, isFlowQuiet, pulseFlow, cancelFlowPulse } from "@/shared/lib/cojeev-motion/flow"
 import { subscribeSettings } from "@/shared/lib/cojeev-motion/settings"
@@ -26,7 +25,7 @@ export function useFlowPress<T extends HTMLElement>(externalRef?:React.Ref<T>):R
   const states=new MutationObserver(records=>{
    if(el.matches(':disabled,[aria-disabled="true"],[data-disabled]:not([data-disabled="false"]),[inert],[hidden]')){restore();return}
    const nextValues=new Map<string,string|null>();let changed=false
-   for(let index=records.length-1;index>=0;index--){const record=records[index];if(!record)continue;const name=record.attributeName;if(record.target!==el||!name)continue
+   for(let index=records.length-1;index>=0;index--){const record=records[index],name=record.attributeName;if(record.target!==el||!name)continue
     const next=nextValues.has(name)?nextValues.get(name)!:el.getAttribute(name);nextValues.set(name,record.oldValue)
     if(name==='data-state')changed ||= semanticStateTransitions.has(`${record.oldValue}:${next}`)
     else if(name==='aria-checked'||name==='aria-pressed')changed ||= record.oldValue!==next

@@ -79,7 +79,7 @@ export function AnimatedIcon({name,preset="auto",active,amplitude=1,duration,eas
     return ()=>{lane.dispose();painter.restore()};
   },[intent,running,name,amount,seconds,ease,active,replay]);
   return <span ref={host} data-slot="animated-icon" data-preset={intent} data-icon-replay={replay||undefined} data-animated={(running&&intent!=="none")||undefined} className="v-animated-icon">
-    <span><Icon name={name} size={size} className={className} {...props} {...(duration === undefined ? {} : { feedbackDuration: duration })} feedbackEase={ease} feedback={false}>{children}</Icon></span>
+    <span><Icon name={name} size={size} className={className} {...props} feedbackDuration={duration} feedbackEase={ease} feedback={false}>{children}</Icon></span>
   </span>;
 }
 

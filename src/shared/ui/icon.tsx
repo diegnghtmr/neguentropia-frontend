@@ -1,4 +1,3 @@
-"use client"
 import * as React from "react"
 import {cva,type VariantProps} from "class-variance-authority"
 import {cn} from "@/shared/lib/utils"
@@ -35,7 +34,7 @@ const extraPaths: Record<string, string[]> = {
 };
 // Separate authored compound strokes into owned parts; coordinates and silhouettes are unchanged.
 for(const name of ["menu","globe","link","save","rocket","circle-help"]) {
-  extraPaths[name]=(extraPaths[name]??[]).flatMap(d=>d.match(/[Mm][^M]*/g)??[d]);
+  extraPaths[name]=extraPaths[name].flatMap(d=>d.match(/[Mm][^M]*/g)??[d]);
 }
 extraPaths.code=["m8 5-7 7 7 7","m16 5 7 7-7 7","m13 3-2 18"];
 const additionalIcons = Object.fromEntries(Object.entries(extraPaths).map(([name, paths]) => [name, paths.map(d => ({ tag: "path", attrs: { d }, children: [] }))])) as Record<string, IconNode[]>;
@@ -258,8 +257,7 @@ export function getIconMotionFrame(name:string,progress:number,amplitude=1):Icon
   const p=Number.isFinite(progress)?Math.max(0,Math.min(1,progress)):1;
   const amount=Number.isFinite(amplitude)?Math.max(0,Math.min(3,amplitude)):1;
   if(!amount)return {};
-  const recipe=iconRecipes[name];
-  if(recipe)return recipeFrame(recipe,p,amount);
+  if(iconRecipes[name])return recipeFrame(iconRecipes[name],p,amount);
   const pulse=Math.sin(Math.PI*p)*amount;
   const scale=(value:number)=>`translate(12 12) scale(${value}) translate(-12 -12)`;
   const move=(x:number,y:number)=>({transform:`translate(${x} ${y})`});
@@ -358,7 +356,7 @@ function organicMotionPath(d:string,amount:number){
   // whether written apart or packed like "0 01 1". Every number still advances the shared counter.
   const number=/-?\d*\.?\d+/y;let out="",index=0,command="",slot=0;
   for(let at=0;at<d.length;){
-    const char=d.charAt(at);
+    const char=d[at];
     if(/[A-Za-z]/.test(char)){command=char;slot=0;out+=char;at++;continue}
     number.lastIndex=at;const match=number.exec(d);
     if(!match){out+=char;at++;continue}
@@ -464,7 +462,7 @@ function useIconFeedback(host:React.RefObject<SVGSVGElement|null>, enabled:boole
     control.addEventListener("focusin",focus);control.addEventListener("focusout",blur);
     control.addEventListener("keydown",key);control.addEventListener("keyup",keyup);control.addEventListener("click",click);
     document.addEventListener("visibilitychange",visibility);
-    const intersection=new IntersectionObserver(([entry])=>{inView=entry?.isIntersecting??false;if(!inView)stop()},{threshold:.1});
+    const intersection=new IntersectionObserver(([entry])=>{inView=entry.isIntersecting;if(!inView)stop()},{threshold:.1});
     intersection.observe(svg);
     const attributes=new MutationObserver(()=>{if(active&&!eligible())stop()});
     for(let ancestor:Element|null=control;ancestor;ancestor=ancestor.parentElement)attributes.observe(ancestor,{attributes:true,attributeFilter:["disabled","aria-disabled","data-disabled","inert","hidden","data-motion","data-flow"]});

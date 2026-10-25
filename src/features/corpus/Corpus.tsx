@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import axios from 'axios';
 import { z } from 'zod';
 import { loadCatalog, loadDetail } from './client';
@@ -48,11 +48,11 @@ export function Corpus() {
             <Badge variant="olive">Corpus ready · {catalog.data.papers.length} papers</Badge>
             <div className="corpus-selection">
               <label htmlFor="paper-selection">Paper</label>
-              <Select value={selectedId} onValueChange={setSelectedId}>
-                <SelectTrigger id="paper-selection" radius="soft" appearance="contour" className="w-full">
-                  <SelectValue placeholder="Choose a paper" />
+              <Select value={selectedId} onValueChange={setSelectedId} containerProps={{ className: 'block w-full min-w-0' }}>
+                <SelectTrigger id="paper-selection" radius="soft" appearance="contour" className="-block">
+                  <span><SelectValue placeholder="Choose a paper" /></span>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent style={{ '--menu-width': 'min(40rem, calc(100vw - 24px))' } as CSSProperties}>
                   {catalog.data.papers.map((paper) => <SelectItem key={paper.id} value={paper.id}>{paper.title}</SelectItem>)}
                 </SelectContent>
               </Select>

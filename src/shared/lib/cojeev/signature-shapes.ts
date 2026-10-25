@@ -3,10 +3,9 @@ const tau = Math.PI * 2;
 export function shapeContour(sample: (angle: number) => Point) {
   const points = Array.from({ length: 96 }, (_, i) => sample(i / 96 * tau));
   const f = (n: number) => Number(n.toFixed(3));
-  // The fixed 96-point construction makes each modular neighbour lookup defined.
-  let path = `M${f(points[0]![0])} ${f(points[0]![1])}`;
+  let path = `M${f(points[0][0])} ${f(points[0][1])}`;
   for (let i = 0; i < points.length; i++) {
-    const before = points[(i + 95) % 96]!, a = points[i]!, b = points[(i + 1) % 96]!, after = points[(i + 2) % 96]!;
+    const before = points[(i + 95) % 96], a = points[i], b = points[(i + 1) % 96], after = points[(i + 2) % 96];
     path += `C${f(a[0] + (b[0] - before[0]) / 6)} ${f(a[1] + (b[1] - before[1]) / 6)} ${f(b[0] - (after[0] - a[0]) / 6)} ${f(b[1] - (after[1] - a[1]) / 6)} ${f(b[0])} ${f(b[1])}`;
   }
   return path + "Z";

@@ -1,7 +1,6 @@
-import {rim,path,spring,type Spring,type Rim,type Point} from "@/shared/lib/cojeev-motion/geometry"
+import {rim,path,spring,type Spring,type Rim} from "@/shared/lib/cojeev-motion/geometry"
 import type {Tier,TierName,MorphConfig} from "@/shared/lib/cojeev-motion/settings"
-// Rim producers create at least 48 samples; loop and nearest-sample indices remain in bounds.
-type BodyFrame={d:string;points:Point[];press:number;active:boolean}
+type BodyFrame={d:string;points:number[][];press:number;active:boolean}
 const drawnFrames=new WeakMap<Body,{at:number;frame:BodyFrame}>()
 export type Body = {
  tier:Tier;tierName:TierName;seed:number;w:number;h:number;base:Rim;R:{left:number;top:number;right:number;bottom:number;width:number;height:number};
@@ -16,9 +15,9 @@ export function bodyPadding(tier:Tier,cfg:MorphConfig,w:number,h:number){const m
 export function stepBody(b:Body,P:{x:number;y:number},dt:number,T:number,cfg:MorphConfig,RM=false,throttleRest=false):BodyFrame{
 const tier=b.tier,base=b.base,per=base.per,m=Math.min(b.w,b.h);
 const R=b.R!;const sx=b.w/R.width,sy=b.h/R.height;const cx=(P.x-R.left)*sx,cy=(P.y-R.top)*sy;const inBox=P.x>R.left-tier.R&&P.x<R.right+tier.R&&P.y>R.top-tier.R&&P.y<R.bottom+tier.R;const has=P.x>-1e3&&!RM&&tier.reach>0&&inBox;
-let ni=0,nd=1e9;if(has){for(let i=0;i<base.length;i+=2){const q=base[i]!;const dd=(q[0]-cx)**2+(q[1]-cy)**2;if(dd<nd){nd=dd;ni=i}}}
+let ni=0,nd=1e9;if(has){for(let i=0;i<base.length;i+=2){const q=base[i];const dd=(q[0]-cx)**2+(q[1]-cy)**2;if(dd<nd){nd=dd;ni=i}}}
 const ins=has&&cx>0&&cx<b.w&&cy>0&&cy<b.h;const dist=Math.sqrt(nd);const near=has&&!ins&&dist<tier.R;
-if(has&&(near||ins)){const q=base[ni]!;let da=q[4]-b.arc.x;da-=Math.round(da/per)*per;b.arc.to=b.arc.x+da;const dx=cx-q[0],dy=cy-q[1],L=Math.hypot(dx,dy)||1;b.dirS.x.to=dx/L;b.dirS.y.to=dy/L}
+if(has&&(near||ins)){const q=base[ni];let da=q[4]-b.arc.x;da-=Math.round(da/per)*per;b.arc.to=b.arc.x+da;const dx=cx-q[0],dy=cy-q[1],L=Math.hypot(dx,dy)||1;b.dirS.x.to=dx/L;b.dirS.y.to=dy/L}
 b.lobe.to=(near&&cfg.reach)?tier.reach*Math.pow(.5*(1-Math.cos(Math.PI*(1-dist/tier.R))),cfg.curve):0;
 b.arc.k=cfg.arcK;b.hold.k=cfg.holdK;b.press.k=b.press.to?260:cfg.pressK;if(b.mergeT>0){b.mergeT-=dt;b.lobe.z=cfg.mergeZ;b.lobe.k=105}else{b.lobe.z=cfg.lobeZ;b.lobe.k=cfg.lobeK}
 b.hold.to=cfg.hold?(ins?tier.inside*Math.max(.35,1-Math.min(dist,60)/80):(b.focus?tier.inside*.6:0)):0;
@@ -35,8 +34,8 @@ spring(b.lobe,dt);spring(b.arc,dt);spring(b.hold,dt);spring(b.press,dt);spring(b
 const idle=(RM||!cfg.rest)?0:tier.amp*m,lobe=b.lobe.x,hold=b.hold.x,pr=b.press.x,rip=b.ripple,jg=b.jiggle;const isSpin=b.tierName==='spinner';const sig2=2*tier.sig*tier.sig;const pa=Math.atan2(cy-b.h/2,(cx-b.w/2)*(b.h/b.w));
 if(tier.depth&&tier.lobes&&(!b.lob||b.lob.n!==tier.lobes||b.lob.a!==tier.asym)){const L=[];let s=b.seed;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280};for(let j=0;j<tier.lobes;j++)L.push({c:j/tier.lobes+(rnd()-.5)*tier.asym*.5/tier.lobes,a:1+(rnd()-.5)*tier.asym*.9,w:1+(rnd()-.5)*tier.asym*.6});b.lob={n:tier.lobes,a:tier.asym,L}}
 const dr=RM?0:T*.05*cfg.drift,armSig=tier.lobes?(tier.spread||.55)/tier.lobes*.5:0;
-const N=base.length,pts=new Array<Point>(N);
-for(let i=0;i<N;i++){const q=base[i]!,x=q[0],y=q[1],nx=q[2],ny=q[3],arc=q[4],u=arc/per;
+const N=base.length,pts=new Array<number[]>(N);
+for(let i=0;i<N;i++){const q=base[i],x=q[0],y=q[1],nx=q[2],ny=q[3],arc=q[4],u=arc/per;
  let k=idle*(Math.sin(u*Math.PI*2*(isSpin?3:2)+T*.38*cfg.restSpeed+b.seed)*.6+Math.sin(u*Math.PI*2*3-T*.26*cfg.restSpeed+b.seed*1.3)*.4);
  if(armSig){let bump=-.35;for(const l of b.lob!.L){let du=u-l.c-dr*(1+l.a*.2);du-=Math.round(du);const s2=armSig*l.w;bump+=l.a*Math.exp(-(du*du)/(2*s2*s2))}k+=tier.depth*m*bump}
  let da=arc-b.arc.x;da-=Math.round(da/per)*per;const g=Math.exp(-(da*da)/sig2);

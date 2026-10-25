@@ -1,9 +1,9 @@
-import type {Rim, Point} from "@/shared/lib/cojeev-motion/geometry"
+import type {Rim} from "@/shared/lib/cojeev-motion/geometry"
 import { signatureShapePaths } from "@/shared/lib/cojeev/signature-shapes"
 // Authored true shapes, sampled by arc length using a detached SVG probe.
 const star=(n:number,ro:number,ri:number)=>{const a=[];for(let i=0;i<n*2;i++){const r=i%2?ri:ro,t=-Math.PI/2+i*Math.PI/n;a.push([50+r*Math.cos(t),50+r*Math.sin(t)])}return 'M'+a.map(p=>p.map(v=>v.toFixed(2)).join(' ')).join('L')+'Z'};
-const polar=(f:(th:number)=>number)=>(t:number):Point=>{const th=t*Math.PI*2;const r=f(th);return [50+r*Math.cos(th),50+r*Math.sin(th)]};
-export const SHAPES:Record<string,string|((t:number)=>Point)>={
+const polar=(f:(th:number)=>number)=>(t:number)=>{const th=t*Math.PI*2;const r=f(th);return [50+r*Math.cos(th),50+r*Math.sin(th)]};
+export const SHAPES:Record<string,string|((t:number)=>number[])>={
 ...signatureShapePaths,
 heart:'M50 90C22 68 6 52 6 33A20 20 0 0 1 50 21A20 20 0 0 1 94 33C94 52 78 68 50 90Z',
 crescent:'M60 5A45 45 0 1 0 60 95A50 50 0 0 1 60 5Z',
@@ -24,12 +24,11 @@ bean:t=>{const th=t*Math.PI*2,s=Math.sin(th);return [50+42*Math.cos(th),50-(26*s
 leaf:t=>{const th=t*Math.PI*2,s=Math.sin(th),x=46*Math.cos(th),y=28*s*Math.pow(Math.abs(s),.45),c=Math.SQRT1_2;return [50+(x-y)*c,50+(x+y)*c]}};
 export const shapeNames=Object.keys(SHAPES);
 // dense raw polyline for a shape (≈600 points)
-function rawShape(name:string){const s=SHAPES[name];if(s===undefined)throw new Error('Unknown Cojeev shape');const N=600,out:Point[]=[];if(typeof s==='function'){for(let i=0;i<N;i++)out.push(s(i/N));return out}const pr=document.createElementNS('http://www.w3.org/2000/svg','path');pr.setAttribute('d',s);const L=pr.getTotalLength();for(let i=0;i<N;i++){const p=pr.getPointAtLength(L*i/N);out.push([p.x,p.y])}return out}
-// Raw shapes have 600 points; cumulative and modular lookups below stay within their constructed arrays.
+function rawShape(name:string){const s=SHAPES[name];const N=600,out=[];if(typeof s==='function'){for(let i=0;i<N;i++)out.push(s(i/N));return out}const pr=document.createElementNS('http://www.w3.org/2000/svg','path');pr.setAttribute('d',s);const L=pr.getTotalLength();for(let i=0;i<N;i++){const p=pr.getPointAtLength(L*i/N);out.push([p.x,p.y])}return out}
 // resample a closed polyline by arc length into n points, fitted (contain, centred) into w×h; returns [x,y,nx,ny,arc] + per
-export function fromShape(name:string,w:number,h:number,step:number){const raw=rawShape(name);let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;for(const [x,y] of raw){if(x<minx)minx=x;if(y<miny)miny=y;if(x>maxx)maxx=x;if(y>maxy)maxy=y}const sc=Math.min(w/(maxx-minx),h/(maxy-miny)),ox=(w-(maxx-minx)*sc)/2-minx*sc,oy=(h-(maxy-miny)*sc)/2-miny*sc;const pts=raw.map(([x,y]):Point=>[x*sc+ox,y*sc+oy]);
-const N=pts.length,cum=[0];for(let i=1;i<=N;i++){const a=pts[i-1]!,b=pts[i%N]!;cum.push(cum[i-1]!+Math.hypot(b[0]-a[0],b[1]-a[1]))}const per=cum[N]!;const n=Math.max(48,Math.min(420,Math.round(per/step)));const out=[] as unknown as Rim;let j=0;
-for(let i=0;i<n;i++){const d=per*i/n;while(j<N-1&&cum[j+1]!<d)j++;const a=pts[j]!,b=pts[(j+1)%N]!,t=(d-cum[j]!)/((cum[j+1]!-cum[j]!)||1);out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,0,0,d])}
+export function fromShape(name:string,w:number,h:number,step:number){const raw=rawShape(name);let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;for(const [x,y] of raw){if(x<minx)minx=x;if(y<miny)miny=y;if(x>maxx)maxx=x;if(y>maxy)maxy=y}const sc=Math.min(w/(maxx-minx),h/(maxy-miny)),ox=(w-(maxx-minx)*sc)/2-minx*sc,oy=(h-(maxy-miny)*sc)/2-miny*sc;const pts=raw.map(([x,y])=>[x*sc+ox,y*sc+oy]);
+const N=pts.length,cum=[0];for(let i=1;i<=N;i++){const a=pts[i-1],b=pts[i%N];cum.push(cum[i-1]+Math.hypot(b[0]-a[0],b[1]-a[1]))}const per=cum[N];const n=Math.max(48,Math.min(420,Math.round(per/step)));const out=[] as unknown as Rim;let j=0;
+for(let i=0;i<n;i++){const d=per*i/n;while(j<N-1&&cum[j+1]<d)j++;const a=pts[j],b=pts[(j+1)%N],t=(d-cum[j])/((cum[j+1]-cum[j])||1);out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,0,0,d])}
 // normals from neighbours; orient outward using the centroid
-let cx=0,cy=0;for(const p of out){cx+=p[0];cy+=p[1]}cx/=n;cy/=n;let sgn=0;for(let i=0;i<n;i++){const a=out[(i-1+n)%n]!,b=out[(i+1)%n]!,point=out[i]!;const tx=b[0]-a[0],ty=b[1]-a[1];const L=Math.hypot(tx,ty)||1;const nx=ty/L,ny=-tx/L;point[2]=nx;point[3]=ny;sgn+=nx*(point[0]-cx)+ny*(point[1]-cy)}if(sgn<0)for(const p of out){p[2]=-p[2];p[3]=-p[3]}
+let cx=0,cy=0;for(const p of out){cx+=p[0];cy+=p[1]}cx/=n;cy/=n;let sgn=0;for(let i=0;i<n;i++){const a=out[(i-1+n)%n],b=out[(i+1)%n];const tx=b[0]-a[0],ty=b[1]-a[1];const L=Math.hypot(tx,ty)||1;const nx=ty/L,ny=-tx/L;out[i][2]=nx;out[i][3]=ny;sgn+=nx*(out[i][0]-cx)+ny*(out[i][1]-cy)}if(sgn<0)for(const p of out){p[2]=-p[2];p[3]=-p[3]}
 out.per=per;out.poly=true;return out}

@@ -6,6 +6,7 @@ import { useDepth } from "@/shared/lib/cojeev-motion/use-depth";
 import { assignMotionRef } from "@/shared/lib/cojeev-motion/refs";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/shared/lib/utils";
+import { Button, type ButtonProps } from "@/shared/ui/button";
 import { useChoreography } from "@/shared/lib/cojeev-motion/choreography";
 
 const cardVariants = cva(
@@ -181,6 +182,22 @@ function CardCover({ className, ...props }: React.ComponentProps<"div">) {
     />
   );
 }
+/** Keep card actions as real Cojeev buttons rather than making the whole card a moving hit area. */
+function CardAction({ className, ...props }: ButtonProps) {
+  return (
+    <Button
+      size="default"
+      variant="outline"
+      className={cn("v-card__action", className)}
+      style={{
+        minHeight: 44,
+        background: "var(--v-canvas)",
+        color: "var(--v-text)",
+      }}
+      {...props}
+    />
+  );
+}
 export {
   Card,
   CardHeader,
@@ -190,6 +207,7 @@ export {
   CardFooter,
   CardWatermark,
   CardCover,
+  CardAction,
   cardVariants,
 };
 export type { CardProps };

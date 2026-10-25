@@ -128,7 +128,7 @@ export const defaultScrollbarAppearance = {
 } as const satisfies Required<ScrollbarAppearanceProps>;
 const ScrollbarAppearanceContext = React.createContext<Required<ScrollbarAppearanceProps>>(defaultScrollbarAppearance);
 function scrollbarAppearance(
-  { scrollbarSize, scrollbarColor, scrollbarVariant }: { [K in keyof ScrollbarAppearanceProps]-?: ScrollbarAppearanceProps[K] | undefined },
+  { scrollbarSize, scrollbarColor, scrollbarVariant }: ScrollbarAppearanceProps,
   inherited: Required<ScrollbarAppearanceProps> = defaultScrollbarAppearance,
 ) {
   scrollbarSize ??= inherited.scrollbarSize;
@@ -418,8 +418,7 @@ function OwnedScrollBar({ scrollElement, refreshKey, className, ref, onKeyDown, 
         onKeyDown?.(event); if (event.defaultPrevented) return;
         const { scrollTop, viewport, maxScroll } = metricsRef.current;
         const targets: Record<string, number> = { ArrowDown: scrollTop + 48, ArrowUp: scrollTop - 48, PageDown: scrollTop + viewport * .9, PageUp: scrollTop - viewport * .9, Home: 0, End: maxScroll, " ": scrollTop + viewport * .9 * (event.shiftKey ? -1 : 1) };
-        const target = targets[event.key];
-        if (target !== undefined) { event.preventDefault(); scrollTo(target); }
+        if (event.key in targets) { event.preventDefault(); scrollTo(targets[event.key]); }
       }}
     >
       <div data-slot="page-scrollbar-thumb" style={{ height: metrics.thumbSize, transform: `translateY(${metrics.thumbOffset}px)` }}>

@@ -1,4 +1,3 @@
-/** A fixed-topology contour in a 20 × 100 viewBox. Only its edges deform. */
 export function scrollThumbPath(engagement: number, bias: number, velocity = 0, pressure = 0) {
   const active = Math.max(0, Math.min(1, Number.isFinite(engagement) ? engagement : 0));
   const speed = Math.max(-1, Math.min(1, Number.isFinite(velocity) ? velocity : 0));
