@@ -5,6 +5,12 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Badge } from '@/shared/ui/badge';
 import { Alert, AlertBody, AlertTitle, AlertDescription } from '@/shared/ui/alert';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/select';
+import { Field, FieldLabel, FieldDescription } from '@/shared/ui/field';
+import { Button } from '@/shared/ui/button';
+import { Empty, EmptyDescription } from '@/shared/ui/empty';
+import { Spinner, SpinnerLabel } from '@/shared/ui/spinner';
+import { Stats, Stat, Label } from '@/shared/ui/label';
+import { TableContainer, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCaption } from '@/shared/ui/table';
 import { loadRanking } from './client';
 import type { RankingResponse } from './schemas';
 
@@ -48,23 +54,23 @@ export function Ranking() {
       <div className="corpus-layout">
         <Card variant="blue" className="corpus-catalog ranking-controls">
           <Badge variant="olive">Counting · Radix · Bucket</Badge>
-          <div className="corpus-selection">
-            <label htmlFor="ranking-scope">Analysis scope</label>
+          <Field controlId="ranking-scope" className="corpus-selection">
+            <FieldLabel>Analysis scope</FieldLabel>
             <Select value="all-20-abstracts" disabled>
-              <SelectTrigger id="ranking-scope" radius="soft" appearance="contour" className="-block">
+              <SelectTrigger id="ranking-scope" aria-describedby="ranking-scope-description" radius="soft" appearance="contour" className="-block">
                 <span><SelectValue /></span>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all-20-abstracts">All 20 abstracts</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          <p>Fixed scope. Titles, authors and other sections are excluded.</p>
-          <button type="button" className="workspace-action" disabled={state.status === 'loading'} onClick={() => { void run(); }}>Run ranking</button>
+            <FieldDescription id="ranking-scope-description">Fixed scope. Titles, authors and other sections are excluded.</FieldDescription>
+          </Field>
+          <Button type="button" loading={state.status === 'loading'} onClick={() => { void run(); }}>Run ranking</Button>
           <p>Java single-run timing; not a benchmark. Sorting only: excludes preparation, counting, statistics, common copies and top-term selection.</p>
         </Card>
         <div className="ranking-output" aria-busy={state.status === 'loading'}>
-          {state.status === 'idle' && <Card variant="cream" className="corpus-empty"><p>No ranking has been run.</p></Card>}
+          {state.status === 'idle' && <Empty><EmptyDescription>No ranking has been run.</EmptyDescription></Empty>}
           {state.status === 'loading' && <RankingFeedback message="Running ranking…" />}
           {state.status === 'error' && <RankingFeedback error message={state.message} />}
           {state.status === 'ready' && <RankingResults data={state.data} />}
@@ -74,9 +80,10 @@ export function Ranking() {
   );
 }
 function RankingFeedback({ message, error = false }: { message: string; error?: boolean }) {
-  return <Alert role={error ? 'alert' : 'status'} variant={error ? 'danger' : 'info'} presentation="note">
+  if (!error) return <div className="corpus-feedback"><Spinner label={message} /><SpinnerLabel aria-hidden="true">{message}</SpinnerLabel></div>;
+  return <Alert role="alert" variant="danger" presentation="note">
     <AlertBody className="col-span-full">
-      <AlertTitle>{error ? 'Unable to rank' : 'Loading'}</AlertTitle>
+      <AlertTitle>Unable to rank</AlertTitle>
       <AlertDescription>{message}</AlertDescription>
     </AlertBody>
   </Alert>;
@@ -93,7 +100,7 @@ function RankingResults({ data }: { data: RankingResponse }) {
     <Card className="ranking-summary">
       <CardHeader><CardTitle>Run details</CardTitle></CardHeader>
       <CardContent>
-        <dl className="ranking-metadata">{metadata.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+        <Stats as="dl" className="ranking-metadata">{metadata.map(([label, value]) => <Stat key={label}><Label as="dt">{label}</Label><dd>{value}</dd></Stat>)}</Stats>
         <p className="corpus-muted">NFC · Locale.ROOT lowercase · Unicode letter/mark/digit runs with a letter · No stopword removal or stemming · Manifest order · First-occurrence ties.</p>
       </CardContent>
     </Card>
@@ -103,11 +110,13 @@ function RankingResults({ data }: { data: RankingResponse }) {
         <p>Sort duration: <strong>{result.sortMilliseconds} ms</strong></p>
       </CardHeader>
       <CardContent>
-        <table aria-label={`${methodLabels[result.method]} top terms`}>
-          <caption>Top {result.topTerms.length} terms · Java order preserved</caption>
-          <thead><tr><th scope="col">Rank</th><th scope="col">Term</th><th scope="col">Frequency</th></tr></thead>
-          <tbody>{result.topTerms.map((entry, index) => <tr key={entry.term}><td>{index + 1}</td><td>{entry.term}</td><td>{entry.frequency}</td></tr>)}</tbody>
-        </table>
+        <TableContainer>
+          <Table aria-label={`${methodLabels[result.method]} top terms`}>
+            <TableCaption>Top {result.topTerms.length} terms · Java order preserved</TableCaption>
+            <TableHeader><TableRow><TableHead numeric>Rank</TableHead><TableHead>Term</TableHead><TableHead numeric>Frequency</TableHead></TableRow></TableHeader>
+            <TableBody>{result.topTerms.map((entry, index) => <TableRow key={entry.term}><TableCell numeric>{index + 1}</TableCell><TableCell>{entry.term}</TableCell><TableCell numeric>{entry.frequency}</TableCell></TableRow>)}</TableBody>
+          </Table>
+        </TableContainer>
         {result.topTerms.length === 0 && <p>No terms were returned.</p>}
       </CardContent>
     </Card>)}

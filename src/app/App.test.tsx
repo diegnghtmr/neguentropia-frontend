@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import App from './App';
 
@@ -14,24 +14,25 @@ describe('application workspace', () => {
     expect(screen.getByText('Read the corpus or run a ranking.')).toBeVisible();
     expect(screen.getByRole('tab', { name: 'Corpus' })).toHaveAttribute('aria-selected', 'true');
   });
-  it('supports mouse and keyboard navigation while preserving the corpus view', () => {
+  it('supports mouse and keyboard navigation while preserving the corpus view', async () => {
     render(<App />);
     const corpus = screen.getByRole('tab', { name: 'Corpus' });
     const ranking = screen.getByRole('tab', { name: 'Ranking' });
-    fireEvent.click(ranking);
+    fireEvent.mouseDown(ranking);
     expect(ranking).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('region', { name: 'Ranking' })).toBeVisible();
-    expect(screen.queryByRole('region', { name: 'Corpus' })).not.toBeInTheDocument();
+    expect(screen.getByText('Corpus reader')).not.toBeVisible();
+    ranking.focus();
     fireEvent.keyDown(ranking, { key: 'ArrowRight' });
-    expect(corpus).toHaveFocus();
+    await waitFor(() => expect(corpus).toHaveFocus());
     expect(screen.getByRole('region', { name: 'Corpus' })).toBeVisible();
     fireEvent.keyDown(corpus, { key: 'End' });
-    expect(ranking).toHaveFocus();
+    await waitFor(() => expect(ranking).toHaveFocus());
     fireEvent.keyDown(ranking, { key: 'Home' });
-    expect(corpus).toHaveFocus();
+    await waitFor(() => expect(corpus).toHaveFocus());
     fireEvent.keyDown(corpus, { key: 'ArrowLeft' });
-    expect(ranking).toHaveFocus();
-    fireEvent.click(corpus);
+    await waitFor(() => expect(ranking).toHaveFocus());
+    fireEvent.mouseDown(corpus);
     expect(screen.getByRole('region', { name: 'Corpus' })).toBeVisible();
   });
   it('composes the corpus reader instead of the obsolete pending-only shell', () => {

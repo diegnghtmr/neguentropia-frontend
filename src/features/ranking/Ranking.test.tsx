@@ -42,8 +42,9 @@ describe('Ranking screen', () => {
     expect(load).not.toHaveBeenCalled();
     expect(screen.getByText('No ranking has been run.')).toBeVisible();
     run();
-    expect(screen.getByRole('status')).toHaveTextContent('Running ranking');
-    expect(screen.getByRole('button', { name: 'Run ranking' })).toBeDisabled();
+    expect(screen.getByRole('status', { name: 'Running ranking…' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run ranking' })).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('button', { name: 'Run ranking' })).toHaveAttribute('aria-disabled', 'true');
     run(); expect(load).toHaveBeenCalledTimes(1);
     await act(async () => { resolve(rankingSchema.parse(rankingFixture())); });
     expect(screen.getAllByRole('table')).toHaveLength(3);

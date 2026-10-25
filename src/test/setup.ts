@@ -25,3 +25,9 @@ HTMLElement.prototype.releasePointerCapture = () => {};
 HTMLElement.prototype.scrollIntoView = () => {};
 
 afterEach(cleanup);
+
+window.matchMedia = (query: string) => ({
+  matches: query.includes('prefers-reduced-motion: reduce'), media: query, onchange: null,
+  addListener: () => {}, removeListener: () => {},
+  addEventListener: () => {}, removeEventListener: () => {}, dispatchEvent: () => false,
+});

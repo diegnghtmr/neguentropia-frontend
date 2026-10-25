@@ -34,6 +34,12 @@
 @import "@/styles/cojeev/card.css";
 @import "@/styles/cojeev/alert.css";
 @import "@/styles/cojeev/select.css";
+@import "@/styles/cojeev/label.css";
+@import "@/styles/cojeev/table.css";
+@import "@/styles/cojeev/field.css";
+@import "@/styles/cojeev/tabs.css";
+@import "@/styles/cojeev/empty.css";
+@import "@/styles/cojeev/skeleton.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -84,7 +90,7 @@ body { min-width: 20rem; }
   letter-spacing: -.025em;
   overflow-wrap: anywhere;
 }
-.workspace-header p, .corpus-muted, .corpus-empty { color: var(--muted-foreground); }
+.workspace-header p, .corpus-muted { color: var(--muted-foreground); }
 .workspace-header p { font-size: var(--fs-small); }
 .workspace-notice { flex-basis: 100%; }
 .workspace-main { flex: 1; padding-block: var(--s-8) var(--s-12); }
@@ -106,16 +112,7 @@ body { min-width: 20rem; }
   border: 1px solid var(--v-blue-deep);
 }
 .corpus-selection { display: grid; gap: var(--s-2); width: 100%; min-width: 0; }
-.corpus-selection label { font-weight: var(--fw-semibold); }
-.corpus-selection select { min-width: 0; max-width: 100%; }
 .corpus-reading, .corpus-paper { min-width: 0; }
-.corpus-empty {
-  display: grid;
-  align-content: center;
-  min-height: 16rem;
-  border: 1px solid var(--border);
-}
-.corpus-empty p { max-width: 32ch; font-size: var(--fs-title); line-height: 1.5; }
 .corpus-reading-card {
   --fs-reading: clamp(24px, 2.5vw, 32px);
   --card-pad: clamp(var(--s-5), 3vw, var(--s-10));
@@ -142,40 +139,13 @@ body { min-width: 20rem; }
   .corpus-layout { grid-template-columns: 17rem minmax(0, 1fr); gap: var(--s-10); }
   .corpus-catalog { --card-pad: var(--s-5); --r-card: var(--r-panel); }
 }
-.workspace-tabs { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-8); }
-.workspace-tabs button, .workspace-action {
-  min-height: var(--ctl-lg);
-  padding: var(--s-2) var(--s-5);
-  border: 1px solid var(--border);
-  border-radius: var(--r-card-sm);
-  font-weight: var(--fw-semibold);
-  cursor: pointer;
-}
-.workspace-tabs button[aria-selected="true"], .workspace-action {
-  background: var(--v-blue);
-  color: var(--v-on-accent);
-  border-color: var(--v-blue-deep);
-}
-.workspace-tabs button:focus-visible, .workspace-action:focus-visible, [role="tabpanel"]:focus-visible {
-  outline: 3px solid var(--foreground);
-  outline-offset: 4px;
-}
-.workspace-action:disabled { cursor: wait; opacity: .65; }
 [role="tabpanel"][hidden] { display: none; }
 .ranking-controls p { font-size: var(--fs-small); max-width: 60ch; }
 .ranking-output { display: grid; gap: var(--s-6); min-width: 0; }
 .ranking-summary, .ranking-result { border: 1px solid var(--border); min-width: 0; }
 .ranking-metadata { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: var(--s-4); }
-.ranking-metadata dt { font-weight: var(--fw-semibold); }
 .ranking-metadata dd { overflow-wrap: anywhere; margin: 0; }
 .ranking-summary .corpus-muted { margin-top: var(--s-5); font-size: var(--fs-small); max-width: 72ch; }
-.ranking table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: var(--fs-small); }
-.ranking caption { text-align: left; color: var(--muted-foreground); padding-bottom: var(--s-4); }
-.ranking th, .ranking td { text-align: left; padding: var(--s-3) 4px; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
-.ranking th { overflow-wrap: normal; }
-.ranking th:first-child { width: 3.5rem; }
-.ranking th:last-child { width: 6.5rem; }
-.ranking td:last-child, .ranking th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 @media (max-width: 24rem) {
   .ranking-summary, .ranking-result { --card-pad: var(--s-4); }
 }

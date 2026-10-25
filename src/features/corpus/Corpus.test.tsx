@@ -46,8 +46,7 @@ describe('Corpus screen', () => {
     const request = deferred<ReturnType<typeof syntheticCatalog>>();
     catalogRequest.mockReturnValue(request.promise);
     render(<Corpus />);
-    expect(screen.getByRole('status')).toHaveTextContent('Loading corpus');
-    expect(screen.getByRole('status')).toHaveAttribute('data-slot', 'alert');
+    expect(screen.getByRole('status', { name: 'Loading corpus…' })).toHaveAttribute('data-slot', 'spinner');
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
     await act(async () => { request.resolve(syntheticCatalog()); });
     expect(screen.queryByText(/Corpus version/)).not.toBeInTheDocument();
@@ -117,7 +116,7 @@ describe('Corpus screen', () => {
     await screen.findByTestId('original-abstract');
     await select('synthetic-2');
     expect(screen.queryByTestId('original-abstract')).not.toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveTextContent('Loading abstract');
+    expect(screen.getByRole('status', { name: 'Loading abstract…' })).toBeInTheDocument();
     await select('synthetic-3');
     await act(async () => { third.reject(new Error('unavailable')); });
     expect(screen.getByRole('alert')).toHaveTextContent('Could not load abstract');

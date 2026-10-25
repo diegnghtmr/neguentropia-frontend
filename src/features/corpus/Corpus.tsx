@@ -7,6 +7,9 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Badge } from '@/shared/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/shared/ui/card';
 import { Alert, AlertBody, AlertTitle, AlertDescription } from '@/shared/ui/alert';
+import { Field, FieldLabel } from '@/shared/ui/field';
+import { Empty, EmptyDescription } from '@/shared/ui/empty';
+import { Spinner, SpinnerLabel } from '@/shared/ui/spinner';
 
 type LoadState<T> = { state: 'loading' } | { state: 'ready'; data: T } | { state: 'error'; message: string };
 const errorCode = z.object({ code: z.string() });
@@ -46,8 +49,8 @@ export function Corpus() {
         <div className="corpus-layout">
           <Card variant="blue" className="corpus-catalog">
             <Badge variant="olive">Corpus ready · {catalog.data.papers.length} papers</Badge>
-            <div className="corpus-selection">
-              <label htmlFor="paper-selection">Paper</label>
+            <Field controlId="paper-selection" className="corpus-selection">
+              <FieldLabel>Paper</FieldLabel>
               <Select value={selectedId} onValueChange={setSelectedId} containerProps={{ className: 'block w-full min-w-0' }}>
                 <SelectTrigger id="paper-selection" radius="soft" appearance="contour" className="-block">
                   <span><SelectValue placeholder="Choose a paper" /></span>
@@ -56,10 +59,10 @@ export function Corpus() {
                   {catalog.data.papers.map((paper) => <SelectItem key={paper.id} value={paper.id}>{paper.title}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </div>
+            </Field>
           </Card>
           <div className="corpus-reading">
-            {selectedId ? <PaperReader key={selectedId} id={selectedId} /> : <Card variant="cream" className="corpus-empty"><p>Select a paper to read its original abstract.</p></Card>}
+            {selectedId ? <PaperReader key={selectedId} id={selectedId} /> : <Empty><EmptyDescription>Select a paper to read its original abstract.</EmptyDescription></Empty>}
           </div>
         </div>
       </>}
@@ -68,10 +71,13 @@ export function Corpus() {
 }
 
 function ReaderFeedback({ message, error = false }: { message: string; error?: boolean }) {
+  if (!error) {
+    return <div className="corpus-feedback"><Spinner label={message} /><SpinnerLabel aria-hidden="true">{message}</SpinnerLabel></div>;
+  }
   return (
-    <Alert role={error ? 'alert' : 'status'} variant={error ? 'danger' : 'info'} presentation="note" className="corpus-feedback">
+    <Alert role="alert" variant="danger" presentation="note" className="corpus-feedback">
       <AlertBody className="col-span-full">
-        <AlertTitle>{error ? 'Unable to load' : 'Loading'}</AlertTitle>
+        <AlertTitle>Unable to load</AlertTitle>
         <AlertDescription>{message}</AlertDescription>
       </AlertBody>
     </Alert>

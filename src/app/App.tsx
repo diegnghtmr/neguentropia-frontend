@@ -1,10 +1,10 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Ranking } from '../features/ranking';
 import { Corpus } from '../features/corpus';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs';
 
 export default function App() {
-  const [view, setView] = useState<'corpus' | 'ranking'>('corpus');
-  const tabs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [view, setView] = useState('corpus');
   return (
     <div className="workspace">
       <header className="workspace-header">
@@ -17,30 +17,18 @@ export default function App() {
       </header>
 
       <main aria-label="Workspace" className="workspace-main">
-        <div role="tablist" aria-label="Workspace views" className="workspace-tabs">
-          {(['corpus', 'ranking'] as const).map((name, index) => <button
-            key={name} ref={(element) => { tabs.current[index] = element; }}
-            type="button" role="tab" id={`${name}-tab`} aria-selected={view === name}
-            aria-controls={`${name}-panel`} tabIndex={view === name ? 0 : -1}
-            onClick={() => setView(name)}
-            onKeyDown={(event) => {
-              let target: number;
-              if (event.key === 'Home') target = 0;
-              else if (event.key === 'End') target = 1;
-              else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') target = 1 - index;
-              else return;
-              event.preventDefault();
-              setView(target === 0 ? 'corpus' : 'ranking');
-              tabs.current[target]?.focus();
-            }}
-          >{name === 'corpus' ? 'Corpus' : 'Ranking'}</button>)}
-        </div>
-        <div role="tabpanel" id="corpus-panel" aria-labelledby="corpus-tab" hidden={view !== 'corpus'} tabIndex={0}>
-          <Corpus />
-        </div>
-        <div role="tabpanel" id="ranking-panel" aria-labelledby="ranking-tab" hidden={view !== 'ranking'} tabIndex={0}>
-          {view === 'ranking' && <Ranking />}
-        </div>
+        <Tabs value={view} onValueChange={setView}>
+          <TabsList aria-label="Workspace views">
+            <TabsTrigger value="corpus">Corpus</TabsTrigger>
+            <TabsTrigger value="ranking">Ranking</TabsTrigger>
+          </TabsList>
+          <TabsContent value="corpus" forceMount hidden={view !== 'corpus'}>
+            <Corpus />
+          </TabsContent>
+          <TabsContent value="ranking">
+            <Ranking />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
