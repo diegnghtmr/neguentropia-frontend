@@ -10,6 +10,10 @@ describe('application workspace', () => {
     render(<App />);
     expect(screen.getByRole('heading', { level: 1, name: 'Neguentropía' })).toBeVisible();
     expect(screen.getByRole('main')).toHaveAccessibleName('Workspace');
+    const logo = document.querySelector('.workspace-header img');
+    expect(logo).toHaveAttribute('src', '/favicon.svg');
+    expect(logo).toHaveAttribute('alt', '');
+    expect(screen.queryByText('N')).not.toBeInTheDocument();
     expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
     expect(screen.queryByText('Read the corpus or run a ranking.')).not.toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Corpus' })).toHaveAttribute('aria-selected', 'true');

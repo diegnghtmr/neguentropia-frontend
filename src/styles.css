@@ -68,17 +68,9 @@ body { min-width: 20rem; }
   padding-block: var(--s-6);
 }
 .workspace-mark {
-  display: grid;
-  place-items: center;
   flex: none;
   width: var(--ctl-lg);
   height: var(--ctl-lg);
-  background: var(--v-pink);
-  color: var(--v-on-accent);
-  border-radius: var(--r-card-sm);
-  font-family: var(--font-display);
-  font-size: var(--fs-section);
-  font-weight: var(--fw-semibold);
 }
 .workspace-brand { flex: 1; min-width: 0; }
 .workspace-header h1 {

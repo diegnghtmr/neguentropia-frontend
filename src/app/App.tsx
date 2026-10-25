@@ -8,7 +8,7 @@ export default function App() {
   return (
     <div className="workspace">
       <header className="workspace-header">
-        <span aria-hidden="true" className="workspace-mark">N</span>
+        <img src="/favicon.svg" alt="" width="48" height="48" className="workspace-mark" />
         <div className="workspace-brand">
           <h1>Neguentropía</h1>
           <p>Text analysis workspace</p>
