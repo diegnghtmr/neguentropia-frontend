@@ -11,7 +11,7 @@ describe('application workspace', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Neguentropía' })).toBeVisible();
     expect(screen.getByRole('main')).toHaveAccessibleName('Workspace');
     expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
-    expect(screen.getByText('Read the corpus or run a ranking.')).toBeVisible();
+    expect(screen.queryByText('Read the corpus or run a ranking.')).not.toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Corpus' })).toHaveAttribute('aria-selected', 'true');
   });
   it('supports mouse and keyboard navigation while preserving the corpus view', async () => {

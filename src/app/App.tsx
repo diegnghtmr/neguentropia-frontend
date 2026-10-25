@@ -13,7 +13,6 @@ export default function App() {
           <h1>Neguentropía</h1>
           <p>Text analysis workspace</p>
         </div>
-        <p className="workspace-notice">Read the corpus or run a ranking.</p>
       </header>
 
       <main aria-label="Workspace" className="workspace-main">

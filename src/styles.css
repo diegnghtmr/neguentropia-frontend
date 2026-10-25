@@ -91,7 +91,6 @@ body { min-width: 20rem; }
 }
 .workspace-header p, .corpus-muted { color: var(--muted-foreground); }
 .workspace-header p { font-size: var(--fs-small); }
-.workspace-notice { flex-basis: 100%; }
 .workspace-main { flex: 1; padding-block: var(--s-8) var(--s-12); }
 .corpus { display: grid; gap: var(--s-8); min-width: 0; }
 .corpus-intro { display: grid; gap: var(--s-2); }
@@ -130,7 +129,6 @@ body { min-width: 20rem; }
 .corpus-feedback { min-width: 0; }
 @media (min-width: 40rem) {
   .workspace-header { padding-block: var(--s-8); }
-  .workspace-notice { flex-basis: auto; margin-left: auto; }
 }
 @media (min-width: 64rem) {
   .workspace-main { padding-top: var(--s-10); }

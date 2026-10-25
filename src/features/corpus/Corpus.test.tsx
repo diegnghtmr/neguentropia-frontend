@@ -57,7 +57,7 @@ describe('Corpus screen', () => {
     expect(selection.tagName).toBe('BUTTON');
     expect(selection).toHaveAttribute('data-slot', 'select-trigger');
     expect(selection).toHaveTextContent('Choose a paper');
-    expect(screen.getByText(/Corpus ready/)).toHaveAttribute('data-slot', 'badge');
+    expect(screen.getByText('Original abstracts of the 20 papers.')).toBeVisible();
     await select();
     const abstract = await screen.findByTestId('original-abstract');
     expect(abstract.closest('[data-slot="card-content"]')).not.toBeNull();

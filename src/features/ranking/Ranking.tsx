@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { z } from 'zod';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
-import { Badge } from '@/shared/ui/badge';
 import { Alert, AlertBody, AlertTitle, AlertDescription } from '@/shared/ui/alert';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/select';
 import { Field, FieldLabel, FieldDescription } from '@/shared/ui/field';
@@ -56,11 +55,10 @@ export function Ranking() {
     <section aria-labelledby="ranking-heading" className="corpus ranking" data-motion="off">
       <div className="corpus-intro">
         <h2 id="ranking-heading">Ranking</h2>
-        <p className="corpus-muted">Three methods, one shared frequency list</p>
+        <p className="corpus-muted">Three sorting methods over the same term frequencies.</p>
       </div>
       <div className="corpus-layout">
         <Card variant="blue" className="corpus-catalog ranking-controls">
-          <Badge variant="olive">Counting · Radix · Bucket</Badge>
           <Field controlId="ranking-scope" className="corpus-selection">
             <FieldLabel>Analysis scope</FieldLabel>
             <Select value="all-20-abstracts" disabled>
@@ -74,7 +72,7 @@ export function Ranking() {
             <FieldDescription id="ranking-scope-description">Fixed scope. Titles, authors and other sections are excluded.</FieldDescription>
           </Field>
           <Button type="button" loading={state.status === 'loading'} onClick={() => { void run(); }}>Run ranking</Button>
-          <p>Java single-run timing; not a benchmark. Sorting only: excludes preparation, counting, statistics, common copies and top-term selection.</p>
+          <p>Times come from a single Java run and cover only the sort. They are not a benchmark.</p>
         </Card>
         <div className="ranking-output" aria-busy={state.status === 'loading'}>
           <MotionPresence mode="wait">
@@ -102,6 +100,10 @@ function RankingFeedback({ message, error = false }: { message: string; error?: 
 function RankingResults({ data }: { data: RankingResponse }) {
   const metadata = [
     ['Preprocessing version', data.preprocessing.version],
+    ['Unicode normalization', data.preprocessing.unicodeNormalization], ['Case rule', data.preprocessing.caseRule],
+    ['Token rule', data.preprocessing.tokenRule], ['Stopwords removed', data.preprocessing.stopwordsRemoved ? 'Yes' : 'No'],
+    ['Stemming applied', data.preprocessing.stemmingApplied ? 'Yes' : 'No'], ['Document order', data.preprocessing.documentOrder],
+    ['Term tie break', data.preprocessing.termTieBreak],
     ['Scope', data.scope], ['Papers', data.paperCount], ['Total tokens', data.totalTokenCount],
     ['Distinct terms', data.distinctTermCount], ['Max frequency', data.maxFrequency],
     ['Radix base', data.parameters.radixBase], ['Bucket strategy', data.parameters.bucketStrategy],
@@ -112,7 +114,6 @@ function RankingResults({ data }: { data: RankingResponse }) {
       <CardHeader><CardTitle>Run details</CardTitle></CardHeader>
       <CardContent>
         <Stats as="dl" className="ranking-metadata">{metadata.map(([label, value]) => <Stat key={label}><Label as="dt">{label}</Label><dd>{value}</dd></Stat>)}</Stats>
-        <p className="corpus-muted">NFC · Locale.ROOT lowercase · Unicode letter/mark/digit runs with a letter · No stopword removal or stemming · Manifest order · First-occurrence ties.</p>
       </CardContent>
     </Card></MotionSurface>
     {data.results.map((result, index) => <MotionSurface key={result.method} preset="soften" delay={0.07 * (index + 1)} exitDuration={0.2}><Card className="ranking-result">
@@ -123,7 +124,7 @@ function RankingResults({ data }: { data: RankingResponse }) {
       <CardContent>
         <TableContainer>
           <Table aria-label={`${methodLabels[result.method]} top terms`}>
-            <TableCaption>Top {result.topTerms.length} terms · Java order preserved</TableCaption>
+            <TableCaption>Top {result.topTerms.length} terms</TableCaption>
             <TableHeader><TableRow><TableHead numeric>Rank</TableHead><TableHead>Term</TableHead><TableHead numeric>Frequency</TableHead></TableRow></TableHeader>
             <TableBody>{result.topTerms.map((entry, index) => <TableRow key={entry.term}><TableCell numeric>{index + 1}</TableCell><TableCell>{entry.term}</TableCell><TableCell numeric>{entry.frequency}</TableCell></TableRow>)}</TableBody>
           </Table>

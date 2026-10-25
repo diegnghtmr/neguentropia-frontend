@@ -55,7 +55,7 @@ describe('Ranking screen', () => {
     for (const text of ['all-20-abstracts', 'tokens-v1', 'interval-counting', '0.125 ms', '0.25 ms', '0.375 ms']) {
       expect(screen.getByText(text)).toBeVisible();
     }
-    expect(screen.getByText(/Java single-run timing; not a benchmark/)).toBeVisible();
+    expect(screen.getByText('Times come from a single Java run and cover only the sort. They are not a benchmark.')).toBeVisible();
     for (const [label, value] of [['Papers', '20'], ['Total tokens', '20'], ['Distinct terms', '3'], ['Max frequency', '9'], ['Radix base', '10'], ['Bucket count', '1'], ['Bucket width', '10']]) {
       expect(screen.getByText(label!).parentElement).toHaveTextContent(value!);
     }

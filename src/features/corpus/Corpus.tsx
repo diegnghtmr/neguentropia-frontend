@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { loadCatalog, loadDetail } from './client';
 import type { PaperCatalog, PaperDetail } from './schemas';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/select';
-import { Badge } from '@/shared/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/shared/ui/card';
 import { Alert, AlertBody, AlertTitle, AlertDescription } from '@/shared/ui/alert';
 import { Field, FieldLabel } from '@/shared/ui/field';
@@ -42,14 +41,13 @@ export function Corpus() {
     <section aria-labelledby="corpus-heading" className="corpus" data-motion="off">
       <div className="corpus-intro">
         <h2 id="corpus-heading">Corpus</h2>
-        <p className="corpus-muted">Local corpus reader</p>
+        <p className="corpus-muted">Original abstracts of the 20 papers.</p>
       </div>
       {catalog.state === 'loading' && <ReaderFeedback message="Loading corpus…" />}
       {catalog.state === 'error' && <ReaderFeedback error message={catalog.message} />}
       {catalog.state === 'ready' && <>
         <div className="corpus-layout">
           <Card variant="blue" className="corpus-catalog">
-            <Badge variant="olive">Corpus ready · {catalog.data.papers.length} papers</Badge>
             <Field controlId="paper-selection" className="corpus-selection">
               <FieldLabel>Paper</FieldLabel>
               <Select value={selectedId} onValueChange={setSelectedId} containerProps={{ className: 'block w-full min-w-0' }}>
