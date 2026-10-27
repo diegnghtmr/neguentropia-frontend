@@ -1,16 +1,7 @@
 import { z } from 'zod';
+import { preprocessingSchema } from '@/shared/api/preprocessing';
 
 const count = z.number().int().nonnegative();
-export const preprocessingSchema = z.strictObject({
-  version: z.string().min(1),
-  unicodeNormalization: z.literal('NFC'),
-  caseRule: z.literal('Locale.ROOT-lowercase'),
-  tokenRule: z.literal('unicode-letter-mark-digit-runs-with-letter'),
-  stopwordsRemoved: z.literal(false),
-  stemmingApplied: z.literal(false),
-  documentOrder: z.literal('manifest'),
-  termTieBreak: z.literal('first-occurrence'),
-});
 export const termFrequencySchema = z.strictObject({ term: z.string().min(1), frequency: z.number().int().positive() });
 export const rankingResultSchema = z.strictObject({
   method: z.enum(['counting-sort', 'radix-sort', 'bucket-sort']),

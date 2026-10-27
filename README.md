@@ -1,6 +1,6 @@
 # Neguentropía — frontend
 
-Local SPA with React 19, Vite 8, strict TypeScript and Tailwind CSS 4. The corpus screen queries the catalog and the selected abstract through Axios, validates the responses with Zod and displays the original text. It does not run analyses or compute frequencies or algorithms in JavaScript.
+Local SPA with React 19, Vite 8, strict TypeScript and Tailwind CSS 4. The corpus screen queries the catalog and the selected abstract through Axios, validates the responses with Zod and displays the original text. Analysis views request Java results; no frequencies or analysis algorithms are computed in JavaScript.
 
 ## Requirements and scope
 
@@ -42,11 +42,17 @@ Scripts:
 
 ## Ranking view
 
-Use the Corpus and Ranking tabs (pointer, arrow keys or Home/End) to switch views. The corpus reader keeps its selection. Ranking runs only when **Run ranking** is pressed and POSTs `{}` to `/api/ranking` through the shared Axios client. A strict Zod boundary validates the corpus, preprocessing, parameters and three ordered results before rendering.
+Use the Corpus, Ranking and Similarity tabs (pointer, arrow keys or Home/End) to switch views. The corpus reader keeps its selection. Ranking runs only when **Run ranking** is pressed and POSTs `{}` to `/api/ranking` through the shared Axios client. A strict Zod boundary validates the corpus, preprocessing, parameters and three ordered results before rendering.
 
 Each method has a top-15 table (or all available terms when fewer than 15 exist), preserving Java's term order, ties and frequencies exactly. Run details show the preprocessing settings returned by the backend, the fixed 20-abstract scope, sizes, Radix base and Bucket parameters. Durations are Java single-run sorting times in **ms**, not benchmarks, HTTP latency or browser render times. Tables use the existing Cojeev visual language without adding chart dependencies.
 
 Loading prevents duplicate submissions. Failures clear prior results and show fixed, sanitized messages for invalid requests, unavailable service, server/network errors or incompatible responses. Leaving Ranking aborts its pending request and discards its result; cancellation does not guarantee stopping Java work. Tests use synthetic fixtures and mocked HTTP only; browser layout and real backend acceptance are separate checks.
+
+## Similarity view
+
+Select two or more papers and at least one method, then press **Run similarity** to compare their abstracts through `/api/similarity`. Levenshtein, LCS, TF-IDF cosine and Jaccard are selected by default. Each pair is identified by paper titles and has a table with four-decimal scores, method-specific explanatory values and Java compute times in milliseconds. TF-IDF uses the full 20-paper corpus. Scores range from 0 to 1 and are not probabilities or plagiarism percentages; compute times are not benchmarks or HTTP latency.
+
+The shared Axios transport and strict Zod validation require complete pairs and the requested methods in order. Loading blocks duplicate runs. Selection changes clear previous results and cancel pending requests; leaving the view also aborts its request. API errors show their validated message without retaining prior results.
 
 ## Reader components
 
@@ -105,7 +111,8 @@ docker run --rm --network=host \
 - `src/app/`: composition of the accessible shell and its test.
 - `src/features/corpus/`: catalog, original reader, schemas and synthetic tests.
 - `src/features/ranking/`: explicit ranking action, validated HTTP boundary, three tables and synthetic tests.
-- `src/shared/`: UI components shared by corpus and ranking, and their support utilities.
+- `src/features/similarity/`: paper and method selection, validated comparisons, pair tables and synthetic tests.
+- `src/shared/`: UI components shared by the views and their support utilities.
 - `src/infrastructure/api/`: Axios instance and public backend URL.
 - `src/main.tsx`: React bootstrap.
 - `src/styles.css`: styles and Tailwind 4.
@@ -117,7 +124,7 @@ The catalog is shown only if it contains exactly 20 unique IDs. The detail must 
 
 The tests use only 20 new synthetic records per case and a mocked network; they contain no real abstracts. They cover invariants, errors, loading, selection, out-of-order responses and shell regressions (brand, main landmark and explicit navigation). Health and preparation are the backend's responsibility: this screen does not infer their state from liveness.
 
-No empty features, unused chart libraries or generic framework are created. Similarity, clustering and search are not implemented yet.
+No empty features, unused chart libraries or generic framework are created. Clustering and search are not implemented yet.
 
 ## Hosting
 

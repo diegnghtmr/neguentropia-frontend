@@ -142,7 +142,20 @@ html::-webkit-scrollbar { display: none; }
 .ranking-metadata { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: var(--s-4); }
 .ranking-metadata dd { overflow-wrap: anywhere; margin: 0; }
 .ranking-summary .corpus-muted { margin-top: var(--s-5); font-size: var(--fs-small); max-width: 72ch; }
+.similarity-controls p { font-size: var(--fs-small); max-width: 60ch; }
+.similarity-selection { display: grid; gap: var(--s-3); min-width: 0; width: 100%; }
+.similarity-selection legend { font-weight: var(--fw-semibold); margin-bottom: var(--s-2); }
+.similarity-selection [data-slot="checkbox"] { width: 100%; text-align: left; align-items: start; }
+.similarity-selection [data-slot="checkbox-body"] { overflow-wrap: anywhere; }
+.similarity-result { min-width: 0; border: 1px solid var(--border); }
+.similarity-result [data-slot="card-title"] { overflow-wrap: anywhere; }
+.similarity-result td { white-space: normal; overflow-wrap: anywhere; }
+.similarity-result td:not(:nth-child(3)) { white-space: nowrap; overflow-wrap: normal; }
+.similarity-papers { max-height: 26rem; overflow-y: auto; grid-auto-rows: max-content; align-content: start; padding-right: var(--s-2); }
+.similarity-result table { min-width: 34rem; }
+.similarity-result td:nth-child(3) { min-width: 16rem; }
 @media (max-width: 24rem) {
+  .similarity-result { --card-pad: var(--s-4); }
   .ranking-summary, .ranking-result { --card-pad: var(--s-4); }
 }
 @media (prefers-reduced-motion: reduce) {

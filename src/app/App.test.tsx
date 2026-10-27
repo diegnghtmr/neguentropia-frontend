@@ -4,6 +4,7 @@ import App from './App';
 
 vi.mock('../features/corpus', () => ({ Corpus: () => <section aria-label="Corpus">Corpus reader</section> }));
 vi.mock('../features/ranking', () => ({ Ranking: () => <section aria-label="Ranking">Ranking screen</section> }));
+vi.mock('../features/similarity', () => ({ Similarity: () => <section aria-label="Similarity">Similarity screen</section> }));
 
 describe('application workspace', () => {
   it('preserves accessible branding, main landmark and no-analysis honesty', () => {
@@ -26,16 +27,20 @@ describe('application workspace', () => {
     expect(ranking).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('region', { name: 'Ranking' })).toBeVisible();
     expect(screen.getByText('Corpus reader')).not.toBeVisible();
+    const similarity = screen.getByRole('tab', { name: 'Similarity' });
     ranking.focus();
     fireEvent.keyDown(ranking, { key: 'ArrowRight' });
+    await waitFor(() => expect(similarity).toHaveFocus());
+    expect(screen.getByRole('region', { name: 'Similarity' })).toBeVisible();
+    fireEvent.keyDown(similarity, { key: 'ArrowRight' });
     await waitFor(() => expect(corpus).toHaveFocus());
     expect(screen.getByRole('region', { name: 'Corpus' })).toBeVisible();
     fireEvent.keyDown(corpus, { key: 'End' });
-    await waitFor(() => expect(ranking).toHaveFocus());
-    fireEvent.keyDown(ranking, { key: 'Home' });
+    await waitFor(() => expect(similarity).toHaveFocus());
+    fireEvent.keyDown(similarity, { key: 'Home' });
     await waitFor(() => expect(corpus).toHaveFocus());
     fireEvent.keyDown(corpus, { key: 'ArrowLeft' });
-    await waitFor(() => expect(ranking).toHaveFocus());
+    await waitFor(() => expect(similarity).toHaveFocus());
     fireEvent.mouseDown(corpus);
     expect(screen.getByRole('region', { name: 'Corpus' })).toBeVisible();
   });
