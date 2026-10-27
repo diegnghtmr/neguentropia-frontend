@@ -17,6 +17,25 @@ export function geminiSimilarityFixture() {
     }],
   };
 }
+export function localSimilarityFixture() {
+  const gemini = geminiSimilarityFixture();
+  return {
+    ...gemini,
+    methods: [...gemini.methods, 'local-embeddings'],
+    pairs: gemini.pairs.map((pair) => ({ ...pair, results: [...pair.results, {
+      method: 'local-embeddings', representation: 'embedding', metric: 'cosine', score: 0.812345,
+      modelConfigurationId: 'local-v1', dimension: 384, cosineMilliseconds: 0.03125,
+    }] })),
+    embeddingRuns: [...gemini.embeddingRuns, {
+      method: 'local-embeddings',
+      configuration: {
+        id: 'local-v1', modelId: 'intfloat/multilingual-e5-small', revision: '614241f622f53c4eeff9890bdc4f31cfecc418b3', dimension: 384,
+        task: 'query', templateVersion: 'v1', normalization: 'l2', inputLengthVerification: 'verified',
+      },
+      papers: gemini.paperIds.map((paperId, i) => ({ paperId, inputTokenCount: 100 + i })),
+    }],
+  };
+}
 export function catalogFixture() {
   return { corpusState: 'ready', papers: Array.from({ length: 20 }, (_, i) => ({
     id: `paper-${i + 1}`, title: `Paper ${i + 1}`, authors: ['Author'],

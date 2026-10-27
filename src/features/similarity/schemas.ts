@@ -18,6 +18,11 @@ const geminiRun = z.strictObject({
   method: z.literal('gemini-embeddings'), configuration: modelConfiguration,
   papers: z.array(geminiVectorAcquisition).min(2).max(20),
 });
+const localVectorAcquisition = z.strictObject({ paperId, inputTokenCount: z.number().int().min(1).max(512) });
+const localRun = z.strictObject({
+  method: z.literal('local-embeddings'), configuration: modelConfiguration,
+  papers: z.array(localVectorAcquisition).min(2).max(20),
+});
 const result = z.discriminatedUnion('method', [
   z.strictObject({ method: z.literal('levenshtein'), representation: z.literal('joined-token-code-points'), score,
     distance: count, leftCodePointLength: count, rightCodePointLength: count, computeMilliseconds }),
@@ -30,13 +35,16 @@ const result = z.discriminatedUnion('method', [
   z.strictObject({ method: z.literal('gemini-embeddings'), representation: z.literal('embedding'), metric: z.literal('cosine'),
     score: z.number().min(-1).max(1), modelConfigurationId: z.string().min(1),
     dimension: z.number().int().positive(), cosineMilliseconds: computeMilliseconds }),
+  z.strictObject({ method: z.literal('local-embeddings'), representation: z.literal('embedding'), metric: z.literal('cosine'),
+    score: z.number().min(-1).max(1), modelConfigurationId: z.string().min(1),
+    dimension: z.number().int().positive(), cosineMilliseconds: computeMilliseconds }),
 ]);
 const paperIds = z.array(paperId).min(2).max(20).refine((ids) => new Set(ids).size === ids.length, 'Duplicate paper IDs');
 const methods = z.array(method).min(1).max(6).refine((items) => new Set(items).size === items.length, 'Duplicate methods');
 export const similaritySchema = z.strictObject({
   preprocessing: preprocessingSchema, paperIds, methods,
   pairs: z.array(z.strictObject({ left: paperId, right: paperId, results: z.array(result).min(1).max(6) })).min(1).max(190),
-  embeddingRuns: z.array(geminiRun).max(1),
+  embeddingRuns: z.array(z.discriminatedUnion('method', [geminiRun, localRun])).max(2),
 });
 export const apiErrorSchema = z.strictObject({
   code: z.enum(['INVALID_INPUT', 'TEXT_TOO_LONG', 'PAPER_NOT_FOUND', 'CORPUS_UNAVAILABLE', 'PROVIDER_UNAVAILABLE', 'MODEL_CONFIGURATION_UNVERIFIED', 'INVALID_PROVIDER_RESPONSE', 'INVALID_VECTOR', 'PROVIDER_TIMEOUT', 'INTERNAL_ERROR']),

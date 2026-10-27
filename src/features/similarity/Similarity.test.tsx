@@ -3,7 +3,7 @@ import { AxiosError, type AxiosAdapter } from 'axios';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { http } from '../../infrastructure/api/http';
 import { Similarity } from './Similarity';
-import { catalogFixture, geminiSimilarityFixture, similarityFixture } from './fixtures.test-support';
+import { catalogFixture, geminiSimilarityFixture, localSimilarityFixture, similarityFixture } from './fixtures.test-support';
 
 const originalAdapter = http.defaults.adapter;
 let post: ReturnType<typeof vi.fn<AxiosAdapter>>;
@@ -44,7 +44,7 @@ describe('Similarity screen', () => {
     post.mockImplementation(async (config) => ({ data: geminiSimilarityFixture(), status: 200, statusText: 'OK', headers: {}, config }));
     render(<Similarity />);
     const methods = within(screen.getByRole('group', { name: 'Methods' })).getAllByRole('checkbox');
-    expect(methods.map((checkbox) => checkbox.textContent)).toEqual(['Levenshtein', 'LCS', 'TF-IDF cosine', 'Jaccard', 'Gemini embeddings']);
+    expect(methods.map((checkbox) => checkbox.textContent)).toEqual(['Levenshtein', 'LCS', 'TF-IDF cosine', 'Jaccard', 'Gemini embeddings', 'Local embeddings']);
     expect(screen.getByRole('checkbox', { name: 'Gemini embeddings' })).not.toBeChecked();
     await selectPair();
     check('Gemini embeddings'); check('LCS'); check('LCS');
@@ -57,7 +57,29 @@ describe('Similarity screen', () => {
     expect(row).toHaveTextContent('Gemini embeddings');
     for (const text of ['-0.1235', 'Model: gemini-embedding-2', 'Dimension: 3072', '0.0625']) expect(within(row).getByText(text)).toBeVisible();
     expect(screen.getByText(/Classical scores range from 0 to 1/)).toHaveTextContent('Embedding cosine ranges from -1 to 1');
-    expect(screen.getByText(/vectors \(Gemini\) are generated once in advance/)).toBeVisible();
+    expect(screen.getByText(/vectors \(Gemini and the local model\) are generated once in advance/)).toBeVisible();
+  });
+  it('offers local embeddings unchecked and renders both embedding rows', async () => {
+    post.mockImplementation(async (config) => ({ data: localSimilarityFixture(), status: 200, statusText: 'OK', headers: {}, config }));
+    render(<Similarity />);
+    expect(screen.getByRole('checkbox', { name: 'Local embeddings' })).not.toBeChecked();
+    await selectPair();
+    check('Gemini embeddings'); check('Local embeddings');
+    run();
+    const table = await screen.findByRole('table');
+    expect(JSON.parse(post.mock.calls[0]![0].data as string)).toEqual({
+      paperIds: ['paper-1', 'paper-2'], methods: ['levenshtein', 'lcs', 'tf-idf-cosine', 'jaccard', 'gemini-embeddings', 'local-embeddings'],
+    });
+    const row = within(table).getAllByRole('row').at(-1)!;
+    expect(row).toHaveTextContent('Local embeddings');
+    for (const text of ['0.8123', 'Model: intfloat/multilingual-e5-small', 'Dimension: 384', 'Left input tokens: 100', 'Right input tokens: 101', '0.03125']) expect(within(row).getByText(text)).toBeVisible();
+    expect(screen.getByText(/generated once in advance/)).toHaveTextContent('Gemini and the local model');
+  });
+  it('shows the provider-unavailable message for local embeddings on 503', async () => {
+    post.mockImplementation(async (config) => { throw new AxiosError('Request failed', undefined, config, undefined, { data: { code: 'PROVIDER_UNAVAILABLE', message: 'Local vectors are unavailable.' }, status: 503, statusText: 'Unavailable', headers: {}, config }); });
+    render(<Similarity />); await selectPair(); check('Local embeddings'); run();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Local vectors are unavailable.');
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
   it('shows the provider-unavailable message for Gemini on 503', async () => {
     post.mockImplementation(async (config) => { throw new AxiosError('Request failed', undefined, config, undefined, { data: { code: 'PROVIDER_UNAVAILABLE', message: 'Gemini vectors are unavailable.' }, status: 503, statusText: 'Unavailable', headers: {}, config }); });
