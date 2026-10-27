@@ -1,10 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import { similaritySchema } from './schemas';
-import { similarityFixture } from './fixtures.test-support';
+import { geminiSimilarityFixture, similarityFixture } from './fixtures.test-support';
 
 describe('similarity response boundary', () => {
   it('accepts a complete classical response unchanged', () => {
     expect(similaritySchema.parse(similarityFixture())).toEqual(similarityFixture());
+  });
+  it('accepts Gemini results and one run with papers in response order', () => {
+    const fixture = geminiSimilarityFixture();
+    expect(similaritySchema.parse(fixture)).toEqual(fixture);
+  });
+  it.each([-1, 0, 1])('accepts Gemini cosine %s', (score) => {
+    const fixture = geminiSimilarityFixture();
+    fixture.pairs[0]!.results[4]!.score = score;
+    expect(similaritySchema.safeParse(fixture).success).toBe(true);
+  });
+  it.each([
+    (f: ReturnType<typeof geminiSimilarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => r.method === 'gemini-embeddings' ? { ...r, score: -1.01 } : r) })) }),
+    (f: ReturnType<typeof geminiSimilarityFixture>) => ({ ...f, embeddingRuns: f.embeddingRuns.map((r) => ({ ...r, papers: r.papers.map((p) => ({ ...p, source: 'generated' })) })) }),
+  ])('rejects incompatible Gemini data %#', (change) => {
+    expect(similaritySchema.safeParse(change(geminiSimilarityFixture())).success).toBe(false);
   });
   it('accepts all 190 pairs for the full catalog', () => {
     const f = similarityFixture();

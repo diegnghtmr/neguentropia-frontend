@@ -3,7 +3,7 @@ import { AxiosError, type AxiosAdapter } from 'axios';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { http } from '../../infrastructure/api/http';
 import { Similarity } from './Similarity';
-import { catalogFixture, similarityFixture } from './fixtures.test-support';
+import { catalogFixture, geminiSimilarityFixture, similarityFixture } from './fixtures.test-support';
 
 const originalAdapter = http.defaults.adapter;
 let post: ReturnType<typeof vi.fn<AxiosAdapter>>;
@@ -38,6 +38,32 @@ describe('Similarity screen', () => {
     post.mockImplementation(async (config) => ({ data: { ...f, methods: ['lcs', 'jaccard'], pairs: f.pairs.map((p) => ({ ...p, results: p.results.filter((r) => ['lcs', 'jaccard'].includes(r.method)) })) }, status: 200, statusText: 'OK', headers: {}, config }));
     run(); await screen.findByRole('table');
     expect(JSON.parse(post.mock.calls[0]![0].data as string)).toEqual({ paperIds: ['paper-1', 'paper-2'], methods: ['lcs', 'jaccard'] });
+    expect(post).toHaveBeenCalledTimes(1);
+  });
+  it('offers Gemini unchecked after the classical methods and renders its requested result', async () => {
+    post.mockImplementation(async (config) => ({ data: geminiSimilarityFixture(), status: 200, statusText: 'OK', headers: {}, config }));
+    render(<Similarity />);
+    const methods = within(screen.getByRole('group', { name: 'Methods' })).getAllByRole('checkbox');
+    expect(methods.map((checkbox) => checkbox.textContent)).toEqual(['Levenshtein', 'LCS', 'TF-IDF cosine', 'Jaccard', 'Gemini embeddings']);
+    expect(screen.getByRole('checkbox', { name: 'Gemini embeddings' })).not.toBeChecked();
+    await selectPair();
+    check('Gemini embeddings'); check('LCS'); check('LCS');
+    run();
+    const table = await screen.findByRole('table');
+    expect(JSON.parse(post.mock.calls[0]![0].data as string)).toEqual({
+      paperIds: ['paper-1', 'paper-2'], methods: ['levenshtein', 'lcs', 'tf-idf-cosine', 'jaccard', 'gemini-embeddings'],
+    });
+    const row = within(table).getAllByRole('row').at(-1)!;
+    expect(row).toHaveTextContent('Gemini embeddings');
+    for (const text of ['-0.1235', 'Model: gemini-embedding-2', 'Dimension: 3072', '0.0625']) expect(within(row).getByText(text)).toBeVisible();
+    expect(screen.getByText(/Classical scores range from 0 to 1/)).toHaveTextContent('Embedding cosine ranges from -1 to 1');
+    expect(screen.getByText(/vectors \(Gemini\) are generated once in advance/)).toBeVisible();
+  });
+  it('shows the provider-unavailable message for Gemini on 503', async () => {
+    post.mockImplementation(async (config) => { throw new AxiosError('Request failed', undefined, config, undefined, { data: { code: 'PROVIDER_UNAVAILABLE', message: 'Gemini vectors are unavailable.' }, status: 503, statusText: 'Unavailable', headers: {}, config }); });
+    render(<Similarity />); await selectPair(); check('Gemini embeddings'); run();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Gemini vectors are unavailable.');
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
     expect(post).toHaveBeenCalledTimes(1);
   });
   it('renders pair titles, ordered rows, scores, explanations and Java timing', async () => {

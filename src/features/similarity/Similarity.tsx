@@ -17,7 +17,8 @@ import { apiErrorSchema, classicalMethods, type SimilarityMethod, type Similarit
 type Papers = Awaited<ReturnType<typeof loadCatalog>>['papers'];
 type CatalogState = { status: 'loading' } | { status: 'ready'; papers: Papers } | { status: 'error'; message: string };
 type State = { status: 'idle' | 'loading' } | { status: 'ready'; data: SimilarityResponse } | { status: 'error'; message: string };
-const methodLabels: Record<SimilarityResult['method'], string> = { levenshtein: 'Levenshtein', lcs: 'LCS', 'tf-idf-cosine': 'TF-IDF cosine', jaccard: 'Jaccard' };
+const offeredMethods = [...classicalMethods, 'gemini-embeddings'] as const;
+const methodLabels: Record<SimilarityResult['method'], string> = { levenshtein: 'Levenshtein', lcs: 'LCS', 'tf-idf-cosine': 'TF-IDF cosine', jaccard: 'Jaccard', 'gemini-embeddings': 'Gemini embeddings' };
 function errorMessage(error: unknown) {
   if (error instanceof z.ZodError) return 'The backend returned an invalid response.';
   if (axios.isAxiosError<unknown>(error)) {
@@ -54,7 +55,7 @@ export function Similarity() {
     try {
       const data = await loadSimilarity({
         paperIds: catalog.papers.filter((paper) => selectedIds.includes(paper.id)).map((paper) => paper.id),
-        methods: classicalMethods.filter((method) => selectedMethods.includes(method)),
+        methods: offeredMethods.filter((method) => selectedMethods.includes(method)),
       }, controller.signal);
       if (!controller.signal.aborted) setState({ status: 'ready', data });
     } catch (error: unknown) {
@@ -66,7 +67,7 @@ export function Similarity() {
   return <section aria-labelledby="similarity-heading" className="corpus similarity" data-motion="off">
     <div className="corpus-intro">
       <h2 id="similarity-heading">Similarity</h2>
-      <p className="corpus-muted">Compare abstracts using classical methods.</p>
+      <p className="corpus-muted">Compare abstracts using classical methods and embeddings.</p>
     </div>
     <div className="corpus-layout">
       <Card variant="blue" className="corpus-catalog similarity-controls">
@@ -87,7 +88,7 @@ export function Similarity() {
           <fieldset className="similarity-selection">
             <legend>Methods</legend>
             <FieldDescription>Select at least one method.</FieldDescription>
-            <CheckboxGroup aria-label="Methods">{classicalMethods.map((method) =>
+            <CheckboxGroup aria-label="Methods">{offeredMethods.map((method) =>
               <Checkbox key={method} checked={selectedMethods.includes(method)} onCheckedChange={(checked) => {
                 clearResult(); setSelectedMethods((methods) => checked === true ? [...methods, method] : methods.filter((item) => item !== method));
               }}><CheckboxBody>{methodLabels[method]}</CheckboxBody></Checkbox>,
@@ -95,8 +96,8 @@ export function Similarity() {
           </fieldset>
         </Field>
         <Button type="button" disabled={catalog.status !== 'ready' || selectedIds.length < 2 || selectedMethods.length === 0 || state.status === 'loading'} loading={state.status === 'loading'} onClick={() => { void run(); }}>Run similarity</Button>
-        <p>Scores range from 0 to 1. Higher scores indicate greater similarity, not a probability or a plagiarism percentage.</p>
-        <p>Compute times are single Java measurements in milliseconds, not HTTP latency or benchmarks. TF-IDF is fitted on all 20 abstracts.</p>
+        <p>Classical scores range from 0 to 1. Embedding cosine ranges from -1 to 1. Higher scores indicate greater similarity, not a probability or a plagiarism percentage.</p>
+        <p>Compute times are single Java measurements in milliseconds, not HTTP latency or benchmarks. TF-IDF is fitted on all 20 abstracts. Embedding vectors (Gemini) are generated once in advance. Embedding compute time measures only the Java cosine calculation.</p>
       </Card>
       <div className="ranking-output" aria-busy={state.status === 'loading'}>
         {state.status === 'idle' && <Empty><EmptyDescription>No comparison has been run.</EmptyDescription></Empty>}
@@ -111,11 +112,17 @@ function Feedback({ message, error = false }: { message: string; error?: boolean
   if (!error) return <div className="corpus-feedback"><Spinner label={message} /><SpinnerLabel aria-hidden="true">{message}</SpinnerLabel></div>;
   return <Alert role="alert" variant="danger" presentation="note"><AlertBody className="col-span-full"><AlertTitle>Unable to compare</AlertTitle><AlertDescription>{message}</AlertDescription></AlertBody></Alert>;
 }
-function Explanation({ result }: { result: SimilarityResult }) {
+function Explanation({ result, data, left, right }: { result: SimilarityResult; data: SimilarityResponse; left: string; right: string }) {
   switch (result.method) {
     case 'levenshtein': return <><p>Distance: {result.distance}</p><p>Left code points: {result.leftCodePointLength}</p><p>Right code points: {result.rightCodePointLength}</p></>;
     case 'lcs': return <><p>Length: {result.length}</p><p>Left tokens: {result.leftTokenCount}</p><p>Right tokens: {result.rightTokenCount}</p><p>Subsequence: {result.subsequence.join(' ') || 'Empty'}</p></>;
     case 'tf-idf-cosine': return <><p>Dimension: {result.dimension}</p><p>Fit papers: {result.fitPaperCount}</p></>;
+    case 'gemini-embeddings': {
+      const run = data.embeddingRuns.find((item) => item.method === result.method)!;
+      const leftPaper = run.papers.find((paper) => paper.paperId === left)!;
+      const rightPaper = run.papers.find((paper) => paper.paperId === right)!;
+      return <><p>Model: {run.configuration.modelId}</p><p>Dimension: {result.dimension}</p><p>Left input tokens: {leftPaper.inputTokenCount}</p><p>Right input tokens: {rightPaper.inputTokenCount}</p></>;
+    }
     case 'jaccard': return <><p>Intersection: {result.intersectionSize}</p><p>Union: {result.unionSize}</p></>;
   }
 }
@@ -133,7 +140,7 @@ function SimilarityResults({ data, papers }: { data: SimilarityResponse; papers:
             <TableHeader><TableRow><TableHead>Method</TableHead><TableHead numeric>Score</TableHead><TableHead>Explanation</TableHead><TableHead numeric>Compute time (ms)</TableHead></TableRow></TableHeader>
             <TableBody>{pair.results.map((result) => <TableRow key={result.method}>
               <TableCell>{methodLabels[result.method]}</TableCell><TableCell numeric>{result.score.toFixed(4)}</TableCell>
-              <TableCell><Explanation result={result} /></TableCell><TableCell numeric>{result.computeMilliseconds}</TableCell>
+              <TableCell><Explanation result={result} data={data} left={pair.left} right={pair.right} /></TableCell><TableCell numeric>{result.method === 'gemini-embeddings' ? result.cosineMilliseconds : result.computeMilliseconds}</TableCell>
             </TableRow>)}</TableBody>
           </Table></TableContainer></CardContent>
         </Card>

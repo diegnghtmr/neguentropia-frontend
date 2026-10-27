@@ -1,3 +1,22 @@
+export function geminiSimilarityFixture() {
+  const classical = similarityFixture();
+  return {
+    ...classical,
+    methods: [...classical.methods, 'gemini-embeddings'],
+    pairs: classical.pairs.map((pair) => ({ ...pair, results: [...pair.results, {
+      method: 'gemini-embeddings', representation: 'embedding', metric: 'cosine', score: -0.123456,
+      modelConfigurationId: 'gemini-v1', dimension: 3072, cosineMilliseconds: 0.0625,
+    }] })),
+    embeddingRuns: [{
+      method: 'gemini-embeddings',
+      configuration: {
+        id: 'gemini-v1', modelId: 'gemini-embedding-2', revision: null, dimension: 3072,
+        task: 'sentence similarity', templateVersion: 'v1', normalization: 'none', inputLengthVerification: 'verified',
+      },
+      papers: classical.paperIds.map((paperId) => ({ paperId, inputTokenCount: 42 })),
+    }],
+  };
+}
 export function catalogFixture() {
   return { corpusState: 'ready', papers: Array.from({ length: 20 }, (_, i) => ({
     id: `paper-${i + 1}`, title: `Paper ${i + 1}`, authors: ['Author'],
