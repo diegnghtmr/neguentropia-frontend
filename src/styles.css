@@ -39,6 +39,8 @@
 @import "@/styles/cojeev/field.css";
 @import "@/styles/cojeev/tabs.css";
 @import "@/styles/cojeev/empty.css";
+@import "@/styles/cojeev/checkbox.css";
+@import "@/styles/cojeev/choice-foundations.css";
 
 @custom-variant dark (&:is(.dark *));
 
