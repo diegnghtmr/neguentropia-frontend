@@ -15,7 +15,7 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 async function openSelection() {
-  const trigger = await screen.findByRole('combobox', { name: 'Paper' });
+  const trigger = await screen.findByRole('combobox', { name: 'Artículo' });
   trigger.focus();
   fireEvent.keyDown(trigger, { key: 'ArrowDown' });
   return screen.findByRole('listbox');
@@ -39,7 +39,12 @@ describe('Corpus screen', () => {
     const request = deferred<ReturnType<typeof syntheticCatalog>>();
     catalogRequest.mockReturnValue(request.promise);
     render(<Corpus />);
-    expect(screen.getByRole('status', { name: 'Loading corpus…' })).toHaveAttribute('data-slot', 'spinner');
+    {
+      const loading = screen.getByRole('status', { name: 'Cargando el corpus' });
+      expect(loading.querySelector('[data-slot="skeleton-item"]')).not.toBeNull();
+      expect(loading.textContent).toBe('');
+      expect(screen.queryByText('Cargando el corpus')).not.toBeInTheDocument();
+    }
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
     await act(async () => { request.resolve(syntheticCatalog()); });
     expect(screen.queryByText(/Corpus version/)).not.toBeInTheDocument();
@@ -51,13 +56,14 @@ describe('Corpus screen', () => {
   });
   it('renders the reader with a labelled Cojeev Select and keyboard selection', async () => {
     const { container } = render(<Corpus />);
-    const selection = await screen.findByRole('combobox', { name: 'Paper' });
+    const selection = await screen.findByRole('combobox', { name: 'Artículo' });
     selection.focus();
     expect(selection).toHaveFocus();
     expect(selection.tagName).toBe('BUTTON');
     expect(selection).toHaveAttribute('data-slot', 'select-trigger');
-    expect(selection).toHaveTextContent('Choose a paper');
-    expect(screen.getByText('Original abstracts of the 20 papers.')).toBeVisible();
+    expect(selection).toHaveTextContent('Elige un artículo');
+    expect(screen.getByText('Abstracts de los 20 artículos.')).toBeVisible();
+    expect(screen.queryByText(/original/i)).not.toBeInTheDocument();
     await select();
     const abstract = await screen.findByTestId('original-abstract');
     expect(abstract.closest('[data-slot="card-content"]')).not.toBeNull();
@@ -70,7 +76,7 @@ describe('Corpus screen', () => {
     catalogRequest.mockRejectedValue(new Error('/private/path secret'));
     render(<Corpus />);
     expect(await screen.findByRole('alert')).toHaveAttribute('data-slot', 'alert');
-    expect(screen.getByRole('alert')).toHaveTextContent('Could not load corpus');
+    expect(screen.getByRole('alert')).toHaveTextContent('No se pudo cargar el corpus');
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.queryByText(/private\/path/)).not.toBeInTheDocument();
   });
@@ -90,13 +96,13 @@ describe('Corpus screen', () => {
       data: { code: 'CORPUS_UNAVAILABLE', message: 'Corpus unavailable.' }, status: 503, statusText: 'Unavailable', headers: {}, config: { headers: {} } as never,
     }));
     render(<Corpus />);
-    expect(await screen.findByRole('alert')).toHaveTextContent('Corpus is unavailable');
+    expect(await screen.findByRole('alert')).toHaveTextContent('El corpus no está disponible');
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
   it('reports a sanitized catalog failure without fallback data', async () => {
     catalogRequest.mockRejectedValue(new Error('/private/path secret'));
     render(<Corpus />);
-    expect(await screen.findByRole('alert')).toHaveTextContent('Could not load corpus');
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar el corpus');
     expect(screen.queryByText(/private\/path/)).not.toBeInTheDocument();
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
@@ -109,10 +115,16 @@ describe('Corpus screen', () => {
     await screen.findByTestId('original-abstract');
     await select('synthetic-2');
     await waitFor(() => expect(screen.queryByTestId('original-abstract')).not.toBeInTheDocument());
-    expect(await screen.findByRole('status', { name: 'Loading abstract…' })).toBeInTheDocument();
+    await screen.findByRole('status', { name: 'Cargando el abstract' });
+    {
+      const loading = screen.getByRole('status', { name: 'Cargando el abstract' });
+      expect(loading.querySelector('[data-slot="skeleton-item"]')).not.toBeNull();
+      expect(loading.textContent).toBe('');
+      expect(screen.queryByText('Cargando el abstract')).not.toBeInTheDocument();
+    }
     await select('synthetic-3');
     await act(async () => { third.reject(new Error('unavailable')); });
-    expect(await screen.findByRole('alert')).toHaveTextContent('Could not load abstract');
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar el abstract');
     await act(async () => { second.resolve(syntheticDetail('synthetic-2')); });
     expect(screen.queryByTestId('original-abstract')).not.toBeInTheDocument();
     expect(screen.getByRole('alert')).toBeVisible();

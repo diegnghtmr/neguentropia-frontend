@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import axios from 'axios';
 import { z } from 'zod';
 import { loadCatalog, loadDetail } from '../corpus/client';
@@ -9,7 +9,7 @@ import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { Alert, AlertBody, AlertTitle, AlertDescription } from '@/shared/ui/alert';
 import { Empty, EmptyDescription } from '@/shared/ui/empty';
-import { Spinner, SpinnerLabel } from '@/shared/ui/spinner';
+import { Skeleton, SkeletonGroup } from '@/shared/ui/skeleton';
 import { TableContainer, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCaption } from '@/shared/ui/table';
 import { searchPapers } from './client';
 import { highlightSegments } from './highlight';
@@ -20,34 +20,39 @@ type Match = { paperId: string; positions: number[]; abstract: string };
 type Loaded = { data: SearchResponse; matches: Match[] };
 type State = { status: 'idle' | 'loading' } | { status: 'ready'; loaded: Loaded } | { status: 'error'; message: string };
 const methodLabels: Record<SearchMethod, string> = { kmp: 'KMP', 'boyer-moore': 'Boyer-Moore', 'rabin-karp': 'Rabin-Karp' };
+const apiMessages = {
+  INVALID_INPUT: 'El patrón no es válido. Escribe un texto y vuelve a intentarlo.',
+  CORPUS_UNAVAILABLE: 'El corpus no está disponible. No se puede buscar.',
+  INTERNAL_ERROR: 'El servidor tuvo un error al buscar. Inténtalo de nuevo más tarde.',
+};
 function errorMessage(error: unknown) {
   if (error instanceof z.ZodError) {
-    return 'The backend returned an invalid search response.';
+    return 'El backend devolvió una respuesta de búsqueda no válida.';
   }
   if (axios.isAxiosError<unknown>(error)) {
     const parsed = apiErrorSchema.safeParse(error.response?.data);
     if (parsed.success) {
-      return `${parsed.data.code}: ${parsed.data.message}`;
+      return apiMessages[parsed.data.code];
     }
   }
-  return 'Could not run the search. Check the backend connection and configuration.';
-}
-function samePositions(data: SearchResponse) {
-  const [first, ...others] = data.results;
-  return others.every((result) => result.papers.every((paper, i) => {
-    const expected = first!.papers[i]!.positions;
-    return paper.positions.length === expected.length && paper.positions.every((position, j) => position === expected[j]);
-  }));
+  return 'No se pudo ejecutar la búsqueda. Revisa la conexión y la configuración del backend.';
 }
 function countLabel(count: number) {
   if (count === 1) {
-    return '1 match';
+    return '1 coincidencia';
   }
-  return `${count} matches`;
+  return `${count} coincidencias`;
+}
+function paperLabel(count: number) {
+  if (count === 1) {
+    return '1 artículo';
+  }
+  return `${count} artículos`;
 }
 
 export function Search() {
   const [papers, setPapers] = useState<Papers>([]);
+  const [catalogFailed, setCatalogFailed] = useState(false);
   const [pattern, setPattern] = useState('');
   const [state, setState] = useState<State>({ status: 'idle' });
   const active = useRef<AbortController | null>(null);
@@ -59,7 +64,11 @@ export function Search() {
           setPapers(data.papers);
         }
       },
-      () => undefined,
+      () => {
+        if (!controller.signal.aborted) {
+          setCatalogFailed(true);
+        }
+      },
     );
     return () => {
       controller.abort();
@@ -81,7 +90,7 @@ export function Search() {
     setState({ status: 'loading' });
     try {
       const data = await searchPapers({ pattern, methods: searchMethods }, controller.signal);
-      const found = data.results[0]!.papers.filter((paper) => paper.positions.length > 0);
+      const found = data.results[0]!.papers.filter((paper) => paper.positions.length > 0).sort((left, right) => right.positions.length - left.positions.length);
       const details = await Promise.all(found.map((paper) => loadDetail(paper.paperId, controller.signal)));
       const matches = found.map((paper, i) => ({ paperId: paper.paperId, positions: paper.positions, abstract: details[i]!.originalAbstract }));
       if (!controller.signal.aborted) {
@@ -99,49 +108,69 @@ export function Search() {
   }
   return <section aria-labelledby="search-heading" className="corpus" data-motion="off">
     <div className="corpus-intro">
-      <h2 id="search-heading">Search</h2>
-      <p className="corpus-muted">Exact pattern search over the 20 original abstracts with KMP, Boyer-Moore and Rabin-Karp.</p>
+      <h2 id="search-heading">Búsqueda</h2>
+      <p className="corpus-muted">Búsqueda exacta de un patrón en los 20 abstracts con KMP, Boyer-Moore y Rabin-Karp.</p>
     </div>
     <div className="corpus-layout">
       <Card variant="blue" className="corpus-catalog">
-      <form onSubmit={(event) => { event.preventDefault(); void run(); }}>
+      <form className="search-form" onSubmit={(event) => { event.preventDefault(); void run(); }}>
         <Field controlId="search-pattern" className="corpus-selection">
-          <FieldLabel>Pattern</FieldLabel>
+          <FieldLabel>Patrón</FieldLabel>
           <FieldControl>
             <Input type="text" radius="soft" appearance="contour" value={pattern} autoComplete="off" spellCheck={false} aria-describedby="search-pattern-description" onChange={(event) => changePattern(event.target.value)} />
           </FieldControl>
-          <FieldDescription id="search-pattern-description">The text is used as typed. Case and accents matter.</FieldDescription>
+          <FieldDescription id="search-pattern-description">Se distinguen mayúsculas y acentos.</FieldDescription>
         </Field>
-        <Button type="submit" disabled={pattern === '' || state.status === 'loading'} loading={state.status === 'loading'}>Search</Button>
+        <Button type="submit" disabled={pattern === '' || state.status === 'loading'}>Buscar</Button>
       </form>
       </Card>
       <div className="ranking-output" aria-busy={state.status === 'loading'}>
-        {state.status === 'idle' && <Empty><EmptyDescription>No search has been run.</EmptyDescription></Empty>}
-        {state.status === 'loading' && <Feedback message="Searching" />}
-        {state.status === 'error' && <Feedback error message={state.message} />}
+        {state.status === 'idle' && <Empty><EmptyDescription>Escribe un patrón y ejecuta la búsqueda.</EmptyDescription></Empty>}
+        {state.status === 'loading' && <SearchSkeleton />}
+        {state.status === 'error' && <Feedback message={state.message} />}
+        {catalogFailed && <Alert role="alert" variant="warn" presentation="note"><AlertBody className="col-span-full"><AlertDescription>No se pudieron cargar los títulos. Se muestran los identificadores.</AlertDescription></AlertBody></Alert>}
         {state.status === 'ready' && <SearchResults loaded={state.loaded} papers={papers} />}
       </div>
     </div>
   </section>;
 }
-function Feedback({ message, error = false }: { message: string; error?: boolean }) {
-  if (!error) {
-    return <div className="corpus-feedback"><Spinner label={message} /><SpinnerLabel aria-hidden="true">{message}</SpinnerLabel></div>;
-  }
-  return <Alert role="alert" variant="danger" presentation="note"><AlertBody className="col-span-full"><AlertTitle>Unable to search</AlertTitle><AlertDescription>{message}</AlertDescription></AlertBody></Alert>;
+function SearchSkeleton() {
+  return <SkeletonGroup role="status" aria-label="Buscando" aria-busy="true" className="skeleton-view">
+    <Skeleton variant="line" style={{ width: '45%' }} />
+    <Card className="ranking-result search-timings">
+      <SkeletonGroup>
+        <Skeleton variant="line" style={{ height: 'var(--s-5)', width: '25%' }} />
+        {[0, 1, 2].map((row) => <div key={row} className="skeleton-row" style={{ '--cols': '40% 1fr 4rem' } as CSSProperties}>
+          <Skeleton variant="line" />
+          <Skeleton variant="line" style={{ width: `${80 - row * 20}%` }} />
+          <Skeleton variant="line" />
+        </div>)}
+      </SkeletonGroup>
+    </Card>
+    {[0, 1].map((card) => <Card key={card} className="ranking-result">
+      <SkeletonGroup>
+        <Skeleton variant="line" style={{ height: 'var(--s-5)', width: '60%' }} />
+        {[100, 94, 98, 70].map((width, row) => <Skeleton key={row} variant="line" style={{ width: `${width}%` }} />)}
+      </SkeletonGroup>
+    </Card>)}
+  </SkeletonGroup>;
+}
+function Feedback({ message }: { message: string }) {
+  return <Alert role="alert" variant="danger" presentation="note"><AlertBody className="col-span-full"><AlertTitle>No se pudo buscar</AlertTitle><AlertDescription>{message}</AlertDescription></AlertBody></Alert>;
 }
 function SearchResults({ loaded, papers }: { loaded: Loaded; papers: Papers }) {
   const { data, matches } = loaded;
   const titles = new Map(papers.map((paper) => [paper.id, paper.title]));
   const total = matches.reduce((sum, match) => sum + match.positions.length, 0);
   return <div className="ranking-output">
-    <Card className="ranking-result">
-      <CardHeader><CardTitle>Timings</CardTitle></CardHeader>
+    {matches.length > 0 && <p role="status">{`${countLabel(total)} en ${paperLabel(matches.length)}.`}</p>}
+    <Card className="ranking-result search-timings">
+      <CardHeader><CardTitle>Tiempos por método</CardTitle></CardHeader>
       <CardContent>
         <TableContainer>
-          <Table aria-label="Search timings">
-            <TableCaption>Single run, in milliseconds. Preprocessing prepares the pattern; search covers the 20 abstracts.</TableCaption>
-            <TableHeader><TableRow><TableHead>Method</TableHead><TableHead numeric>Preprocessing (ms)</TableHead><TableHead numeric>Search (ms)</TableHead></TableRow></TableHeader>
+          <Table aria-label="Tiempos por método">
+            <TableCaption>Una sola ejecución. El preprocesamiento prepara el patrón; la búsqueda recorre los abstracts.</TableCaption>
+            <TableHeader><TableRow><TableHead>Método</TableHead><TableHead numeric>Preprocesamiento (ms)</TableHead><TableHead numeric>Búsqueda (ms)</TableHead></TableRow></TableHeader>
             <TableBody>{data.results.map((result) => <TableRow key={result.method}>
               <TableCell>{methodLabels[result.method]}</TableCell>
               <TableCell numeric>{result.preprocessingMilliseconds.toFixed(4)}</TableCell>
@@ -149,11 +178,9 @@ function SearchResults({ loaded, papers }: { loaded: Loaded; papers: Papers }) {
             </TableRow>)}</TableBody>
           </Table>
         </TableContainer>
-        <p role="status">{samePositions(data) ? 'All three methods returned the same positions.' : 'The methods returned different positions.'}</p>
-        <p>{`Total matches: ${total}`}</p>
       </CardContent>
     </Card>
-    {matches.length === 0 && <Empty><EmptyDescription>No matches</EmptyDescription></Empty>}
+    {matches.length === 0 && <Empty><EmptyDescription>Sin coincidencias</EmptyDescription></Empty>}
     {matches.map((match) => <Card key={match.paperId} className="ranking-result" role="article" aria-label={titles.get(match.paperId) ?? match.paperId}>
       <CardHeader>
         <CardTitle>{titles.get(match.paperId) ?? match.paperId}</CardTitle>

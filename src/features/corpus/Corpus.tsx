@@ -8,22 +8,25 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/sha
 import { Alert, AlertBody, AlertTitle, AlertDescription } from '@/shared/ui/alert';
 import { Field, FieldLabel } from '@/shared/ui/field';
 import { Empty, EmptyDescription } from '@/shared/ui/empty';
-import { Spinner, SpinnerLabel } from '@/shared/ui/spinner';
+import { Skeleton, SkeletonGroup } from '@/shared/ui/skeleton';
 import { MotionPresence, MotionSurface } from '@/shared/ui/presence';
 
 type LoadState<T> = { state: 'loading' } | { state: 'ready'; data: T } | { state: 'error'; message: string };
 const errorCode = z.object({ code: z.string() });
-function errorMessage(error: unknown, subject: 'corpus' | 'abstract') {
+function errorMessage(error: unknown, subject: 'el corpus' | 'el abstract') {
   if (axios.isAxiosError<unknown>(error)) {
     const parsed = errorCode.safeParse(error.response?.data);
     if (parsed.success && parsed.data.code === 'CORPUS_UNAVAILABLE') {
-      return 'Corpus is unavailable. No article data can be shown.';
+      return 'El corpus no está disponible. No se pueden mostrar artículos.';
     }
     if (parsed.success && parsed.data.code === 'PAPER_NOT_FOUND') {
-      return 'Paper was not found. Reload the page to refresh the catalog.';
+      return 'No se encontró el artículo. Recarga la página para actualizar el catálogo.';
+    }
+    if (parsed.success && parsed.data.code === 'INTERNAL_ERROR') {
+      return 'El servidor tuvo un error al leer el corpus. Inténtalo de nuevo más tarde.';
     }
   }
-  return `Could not load ${subject}. Check the backend connection and configuration, then reload the page.`;
+  return `No se pudo cargar ${subject}. Revisa la conexión y la configuración del backend, y recarga la página.`;
 }
 export function Corpus() {
   const [catalog, setCatalog] = useState<LoadState<PaperCatalog>>({ state: 'loading' });
@@ -32,7 +35,7 @@ export function Corpus() {
     const controller = new AbortController();
     loadCatalog(controller.signal).then(
       (data) => { if (!controller.signal.aborted) setCatalog({ state: 'ready', data }); },
-      (error: unknown) => { if (!controller.signal.aborted) setCatalog({ state: 'error', message: errorMessage(error, 'corpus') }); },
+      (error: unknown) => { if (!controller.signal.aborted) setCatalog({ state: 'error', message: errorMessage(error, 'el corpus') }); },
     );
     return () => controller.abort();
   }, []);
@@ -41,21 +44,21 @@ export function Corpus() {
     <section aria-labelledby="corpus-heading" className="corpus" data-motion="off">
       <div className="corpus-intro">
         <h2 id="corpus-heading">Corpus</h2>
-        <p className="corpus-muted">Original abstracts of the 20 papers.</p>
+        <p className="corpus-muted">Abstracts de los 20 artículos.</p>
       </div>
-      {catalog.state === 'loading' && <ReaderFeedback message="Loading corpus…" />}
-      {catalog.state === 'error' && <ReaderFeedback error message={catalog.message} />}
+      {catalog.state === 'loading' && <MotionSurface preset="fade"><CatalogSkeleton /></MotionSurface>}
+      {catalog.state === 'error' && <ReaderFeedback message={catalog.message} />}
       {catalog.state === 'ready' && <>
         <div className="corpus-layout">
           <Card variant="blue" className="corpus-catalog">
             <Field controlId="paper-selection" className="corpus-selection">
-              <FieldLabel>Paper</FieldLabel>
+              <FieldLabel>Artículo</FieldLabel>
               <Select value={selectedId} onValueChange={setSelectedId} containerProps={{ className: 'block w-full min-w-0' }}>
                 <SelectTrigger id="paper-selection" radius="soft" appearance="contour" className="-block">
-                  <span><SelectValue placeholder="Choose a paper" /></span>
+                  <span><SelectValue placeholder="Elige un artículo" /></span>
                 </SelectTrigger>
                 <SelectContent style={{ '--menu-width': 'min(40rem, calc(100vw - 24px))' } as CSSProperties}>
-                  {catalog.data.papers.map((paper) => <SelectItem key={paper.id} value={paper.id}>{paper.title}</SelectItem>)}
+                  {catalog.data.papers.map((paper) => <SelectItem key={paper.id} value={paper.id} adornment="none">{paper.title}</SelectItem>)}
                 </SelectContent>
               </Select>
             </Field>
@@ -64,7 +67,7 @@ export function Corpus() {
             <MotionPresence mode="wait">
               {selectedId
                 ? <PaperReader key={selectedId} id={selectedId} />
-                : <MotionSurface key="empty" preset="soften" exitDuration={0.2}><Empty><EmptyDescription>Select a paper to read its original abstract.</EmptyDescription></Empty></MotionSurface>}
+                : <MotionSurface key="empty" preset="soften" exitDuration={0.2}><Empty><EmptyDescription>Elige un artículo para leer su abstract.</EmptyDescription></Empty></MotionSurface>}
             </MotionPresence>
           </div>
         </div>
@@ -73,15 +76,33 @@ export function Corpus() {
   );
 }
 
-function ReaderFeedback({ message, error = false }: { message: string; error?: boolean }) {
-  if (!error) {
-    return <MotionSurface preset="fade" className="corpus-feedback"><Spinner label={message} /><SpinnerLabel aria-hidden="true">{message}</SpinnerLabel></MotionSurface>;
-  }
+function CatalogSkeleton() {
+  return (
+    <SkeletonGroup role="status" aria-label="Cargando el corpus" aria-busy="true">
+      <Skeleton variant="pill" style={{ height: 'var(--s-10)', width: '100%' }} />
+    </SkeletonGroup>
+  );
+}
+
+function PaperSkeleton() {
+  const widths = ['100%', '96%', '100%', '88%', '98%', '92%', '100%', '58%'];
+  return (
+    <SkeletonGroup role="status" aria-label="Cargando el abstract" aria-busy="true" className="skeleton-view">
+      <Skeleton variant="line" style={{ height: 'var(--s-6)', width: '78%' }} />
+      <Skeleton variant="line" style={{ width: '42%' }} />
+      <SkeletonGroup>
+        {widths.map((width, index) => <Skeleton key={index} variant="line" style={{ width }} />)}
+      </SkeletonGroup>
+    </SkeletonGroup>
+  );
+}
+
+function ReaderFeedback({ message }: { message: string }) {
   return (
     <MotionSurface preset="soften" exitDuration={0.2}>
       <Alert role="alert" variant="danger" presentation="note" className="corpus-feedback">
         <AlertBody className="col-span-full">
-          <AlertTitle>Unable to load</AlertTitle>
+          <AlertTitle>No se pudo cargar</AlertTitle>
           <AlertDescription>{message}</AlertDescription>
         </AlertBody>
       </Alert>
@@ -101,15 +122,15 @@ function PaperReader({ id }: { id: string }) {
     const controller = new AbortController();
     loadDetail(id, controller.signal).then(
       (data) => { if (!controller.signal.aborted) setDetail({ state: 'ready', data }); },
-      (error: unknown) => { if (!controller.signal.aborted) setDetail({ state: 'error', message: errorMessage(error, 'abstract') }); },
+      (error: unknown) => { if (!controller.signal.aborted) setDetail({ state: 'error', message: errorMessage(error, 'el abstract') }); },
     );
     return () => controller.abort();
   }, [id]);
   return (
     <MotionSurface preset="fade" exitDuration={0.2}>
       <MotionPresence mode="wait">
-        {detail.state === 'loading' && slow && <ReaderFeedback key="loading" message="Loading abstract…" />}
-        {detail.state === 'error' && <ReaderFeedback key="error" error message={detail.message} />}
+        {detail.state === 'loading' && slow && <MotionSurface key="loading" preset="fade"><PaperSkeleton /></MotionSurface>}
+        {detail.state === 'error' && <ReaderFeedback key="error" message={detail.message} />}
         {detail.state === 'ready' && <MotionSurface key="ready" preset="soften" exitDuration={0.2}><PaperArticle detail={detail.data} /></MotionSurface>}
       </MotionPresence>
     </MotionSurface>
@@ -127,7 +148,7 @@ function PaperArticle({ detail }: { detail: PaperDetail }) {
           </div>
         </CardHeader>
         <CardContent>
-          <h4>Original abstract</h4>
+          <h4>Abstract</h4>
           <p data-testid="original-abstract" className="corpus-abstract">{detail.originalAbstract}</p>
         </CardContent>
       </Card>

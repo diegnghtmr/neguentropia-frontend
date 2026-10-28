@@ -14,18 +14,18 @@ export default function App() {
         <img src="/favicon.svg" alt="" width="48" height="48" className="workspace-mark" />
         <div className="workspace-brand">
           <h1>Neguentropía</h1>
-          <p>Text analysis workspace</p>
+          <p>Espacio de análisis de textos</p>
         </div>
       </header>
 
-      <main aria-label="Workspace" className="workspace-main">
+      <main aria-label="Espacio de trabajo" className="workspace-main">
         <Tabs value={view} onValueChange={setView}>
-          <TabsList aria-label="Workspace views">
+          <TabsList aria-label="Vistas del espacio de trabajo">
             <TabsTrigger value="corpus">Corpus</TabsTrigger>
             <TabsTrigger value="ranking">Ranking</TabsTrigger>
-            <TabsTrigger value="similarity">Similarity</TabsTrigger>
-            <TabsTrigger value="clustering">Clustering</TabsTrigger>
-            <TabsTrigger value="search">Search</TabsTrigger>
+            <TabsTrigger value="similarity">Similitud</TabsTrigger>
+            <TabsTrigger value="clustering">Agrupamiento</TabsTrigger>
+            <TabsTrigger value="search">Búsqueda</TabsTrigger>
           </TabsList>
           <TabsContent value="corpus" forceMount hidden={view !== 'corpus'}>
             <Corpus />

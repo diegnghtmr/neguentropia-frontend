@@ -4,15 +4,15 @@ import App from './App';
 
 vi.mock('../features/corpus', () => ({ Corpus: () => <section aria-label="Corpus">Corpus reader</section> }));
 vi.mock('../features/ranking', () => ({ Ranking: () => <section aria-label="Ranking">Ranking screen</section> }));
-vi.mock('../features/clustering', () => ({ Clustering: () => <section aria-label="Clustering">Clustering screen</section> }));
-vi.mock('../features/search', () => ({ Search: () => <section aria-label="Search">Search screen</section> }));
-vi.mock('../features/similarity', () => ({ Similarity: () => <section aria-label="Similarity">Similarity screen</section> }));
+vi.mock('../features/clustering', () => ({ Clustering: () => <section aria-label="Agrupamiento">Clustering screen</section> }));
+vi.mock('../features/search', () => ({ Search: () => <section aria-label="Búsqueda">Search screen</section> }));
+vi.mock('../features/similarity', () => ({ Similarity: () => <section aria-label="Similitud">Similarity screen</section> }));
 
 describe('application workspace', () => {
   it('preserves accessible branding, main landmark and no-analysis honesty', () => {
     render(<App />);
     expect(screen.getByRole('heading', { level: 1, name: 'Neguentropía' })).toBeVisible();
-    expect(screen.getByRole('main')).toHaveAccessibleName('Workspace');
+    expect(screen.getByRole('main')).toHaveAccessibleName('Espacio de trabajo');
     const logo = document.querySelector('.workspace-header img');
     expect(logo).toHaveAttribute('src', '/favicon.svg');
     expect(logo).toHaveAttribute('alt', '');
@@ -29,19 +29,19 @@ describe('application workspace', () => {
     expect(ranking).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('region', { name: 'Ranking' })).toBeVisible();
     expect(screen.getByText('Corpus reader')).not.toBeVisible();
-    const similarity = screen.getByRole('tab', { name: 'Similarity' });
+    const similarity = screen.getByRole('tab', { name: 'Similitud' });
     ranking.focus();
     fireEvent.keyDown(ranking, { key: 'ArrowRight' });
     await waitFor(() => expect(similarity).toHaveFocus());
-    expect(screen.getByRole('region', { name: 'Similarity' })).toBeVisible();
-    const clustering = screen.getByRole('tab', { name: 'Clustering' });
+    expect(screen.getByRole('region', { name: 'Similitud' })).toBeVisible();
+    const clustering = screen.getByRole('tab', { name: 'Agrupamiento' });
     fireEvent.keyDown(similarity, { key: 'ArrowRight' });
     await waitFor(() => expect(clustering).toHaveFocus());
-    expect(screen.getByRole('region', { name: 'Clustering' })).toBeVisible();
-    const search = screen.getByRole('tab', { name: 'Search' });
+    expect(screen.getByRole('region', { name: 'Agrupamiento' })).toBeVisible();
+    const search = screen.getByRole('tab', { name: 'Búsqueda' });
     fireEvent.keyDown(clustering, { key: 'ArrowRight' });
     await waitFor(() => expect(search).toHaveFocus());
-    expect(screen.getByRole('region', { name: 'Search' })).toBeVisible();
+    expect(screen.getByRole('region', { name: 'Búsqueda' })).toBeVisible();
     fireEvent.keyDown(search, { key: 'ArrowRight' });
     await waitFor(() => expect(corpus).toHaveFocus());
     expect(screen.getByRole('region', { name: 'Corpus' })).toBeVisible();
