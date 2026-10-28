@@ -5,6 +5,7 @@ import App from './App';
 vi.mock('../features/corpus', () => ({ Corpus: () => <section aria-label="Corpus">Corpus reader</section> }));
 vi.mock('../features/ranking', () => ({ Ranking: () => <section aria-label="Ranking">Ranking screen</section> }));
 vi.mock('../features/clustering', () => ({ Clustering: () => <section aria-label="Clustering">Clustering screen</section> }));
+vi.mock('../features/search', () => ({ Search: () => <section aria-label="Search">Search screen</section> }));
 vi.mock('../features/similarity', () => ({ Similarity: () => <section aria-label="Similarity">Similarity screen</section> }));
 
 describe('application workspace', () => {
@@ -37,15 +38,19 @@ describe('application workspace', () => {
     fireEvent.keyDown(similarity, { key: 'ArrowRight' });
     await waitFor(() => expect(clustering).toHaveFocus());
     expect(screen.getByRole('region', { name: 'Clustering' })).toBeVisible();
+    const search = screen.getByRole('tab', { name: 'Search' });
     fireEvent.keyDown(clustering, { key: 'ArrowRight' });
+    await waitFor(() => expect(search).toHaveFocus());
+    expect(screen.getByRole('region', { name: 'Search' })).toBeVisible();
+    fireEvent.keyDown(search, { key: 'ArrowRight' });
     await waitFor(() => expect(corpus).toHaveFocus());
     expect(screen.getByRole('region', { name: 'Corpus' })).toBeVisible();
     fireEvent.keyDown(corpus, { key: 'End' });
-    await waitFor(() => expect(clustering).toHaveFocus());
-    fireEvent.keyDown(clustering, { key: 'Home' });
+    await waitFor(() => expect(search).toHaveFocus());
+    fireEvent.keyDown(search, { key: 'Home' });
     await waitFor(() => expect(corpus).toHaveFocus());
     fireEvent.keyDown(corpus, { key: 'ArrowLeft' });
-    await waitFor(() => expect(clustering).toHaveFocus());
+    await waitFor(() => expect(search).toHaveFocus());
     fireEvent.mouseDown(corpus);
     expect(screen.getByRole('region', { name: 'Corpus' })).toBeVisible();
   });

@@ -42,7 +42,7 @@ Scripts:
 
 ## Ranking view
 
-Use the Corpus, Ranking, Similarity and Clustering tabs (pointer, arrow keys or Home/End) to switch views. The corpus reader keeps its selection. Ranking runs only when **Run ranking** is pressed and POSTs `{}` to `/api/ranking` through the shared Axios client. A strict Zod boundary validates the corpus, preprocessing, parameters and three ordered results before rendering.
+Use the Corpus, Ranking, Similarity, Clustering and Search tabs (pointer, arrow keys or Home/End) to switch views. The corpus reader keeps its selection. Ranking runs only when **Run ranking** is pressed and POSTs `{}` to `/api/ranking` through the shared Axios client. A strict Zod boundary validates the corpus, preprocessing, parameters and three ordered results before rendering.
 
 Each method has a top-15 table (or all available terms when fewer than 15 exist), preserving Java's term order, ties and frequencies exactly. Run details show the preprocessing settings returned by the backend, the fixed 20-abstract scope, sizes, Radix base and Bucket parameters. Durations are Java single-run sorting times in **ms**, not benchmarks, HTTP latency or browser render times. Tables use the existing Cojeev visual language without adding chart dependencies.
 
@@ -59,6 +59,12 @@ The shared Axios transport and strict Zod validation require complete pairs and 
 Choose the number of clusters (2 to 19, initially 2) and press **Run clustering**. The view POSTs `{ "clusterCount": n }` to `/api/clustering` through the shared Axios client and validates the response with a strict Zod boundary: a strict shape with no extra fields, 20 leaves, three results in the order single, complete and average linkage, 19 merges per tree, and value ranges for ids, heights, sizes, silhouette and the number of groups. Merge references, sizes and partition coverage are not checked; they come from the backend as computed.
 
 Each result shows its dendrogram, its silhouette value and the groups of the cut, with titles from the corpus catalog (paper IDs if the catalog is unavailable). The method with the highest silhouette is marked as the most coherent; when two methods tie for the highest value both are marked, and when all three are equal the view says no method is more coherent. The dendrogram is a plain React SVG: leaves follow the order of a walk from the root (left child first), each merge sits at the height computed by the backend on a labeled distance axis, and a merge is placed at the midpoint of its children. Merge heights and groups are also available as text. The browser never recomputes clustering, heights or silhouette. Changing the cluster count discards the previous result; errors show the API code and message.
+
+## Search view
+
+Type a pattern and press **Search** (disabled while the field is empty). The view POSTs `{ "pattern": ..., "methods": ["kmp", "boyer-moore", "rabin-karp"] }` to `/api/search` through the shared Axios client and validates the response with a strict Zod boundary: no extra fields, one to three method results, 20 papers per result, non-negative durations and positions.
+
+A table shows each method's preprocessing time and search time in milliseconds, followed by a line saying whether the three methods returned the same positions and the total number of matches. Each paper with at least one match shows its title (from the corpus catalog, or its ID if the catalog is unavailable), its number of matches and its original abstract, fetched from the paper detail endpoint, with every match highlighted using the positions computed by Java (`start` to `start + pattern length`). Overlapping matches are merged into one highlighted range for display, and the text is rendered as text, never HTML. When nothing matches the view says "No matches". Errors show the API code and message. The browser never searches the text itself.
 
 ## Reader components
 
@@ -119,6 +125,7 @@ docker run --rm --network=host \
 - `src/features/ranking/`: explicit ranking action, validated HTTP boundary, three tables and synthetic tests.
 - `src/features/similarity/`: paper and method selection, validated comparisons, pair tables and synthetic tests.
 - `src/features/clustering/`: cluster count selector, validated clustering response, SVG dendrograms, groups, silhouette and synthetic tests.
+- `src/features/search/`: pattern field, validated search response, timings table, highlighted abstracts and synthetic tests.
 - `src/shared/`: UI components shared by the views and their support utilities.
 - `src/infrastructure/api/`: Axios instance and public backend URL.
 - `src/main.tsx`: React bootstrap.
@@ -131,7 +138,7 @@ The catalog is shown only if it contains exactly 20 unique IDs. The detail must 
 
 The tests use only 20 new synthetic records per case and a mocked network; they contain no real abstracts. They cover invariants, errors, loading, selection, out-of-order responses and shell regressions (brand, main landmark and explicit navigation). Health and preparation are the backend's responsibility: this screen does not infer their state from liveness.
 
-No empty features, unused chart libraries or generic framework are created. Search is not implemented yet.
+No empty features, unused chart libraries or generic framework are created.
 
 ## Hosting
 

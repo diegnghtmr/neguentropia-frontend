@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Ranking } from '../features/ranking';
 import { Similarity } from '../features/similarity';
 import { Clustering } from '../features/clustering';
+import { Search } from '../features/search';
 import { Corpus } from '../features/corpus';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs';
 
@@ -24,6 +25,7 @@ export default function App() {
             <TabsTrigger value="ranking">Ranking</TabsTrigger>
             <TabsTrigger value="similarity">Similarity</TabsTrigger>
             <TabsTrigger value="clustering">Clustering</TabsTrigger>
+            <TabsTrigger value="search">Search</TabsTrigger>
           </TabsList>
           <TabsContent value="corpus" forceMount hidden={view !== 'corpus'}>
             <Corpus />
@@ -36,6 +38,9 @@ export default function App() {
           </TabsContent>
           <TabsContent value="clustering" forceMount hidden={view !== 'clustering'}>
             {view === 'clustering' && <Clustering />}
+          </TabsContent>
+          <TabsContent value="search" forceMount hidden={view !== 'search'}>
+            {view === 'search' && <Search />}
           </TabsContent>
         </Tabs>
       </main>
