@@ -6,7 +6,7 @@ describe('similarity response boundary', () => {
   it('accepts a complete classical response unchanged', () => {
     expect(similaritySchema.parse(similarityFixture())).toEqual(similarityFixture());
   });
-  it('accepts Gemini results and one run with papers in response order', () => {
+  it('accepts Gemini results with model and dimension', () => {
     const fixture = geminiSimilarityFixture();
     expect(similaritySchema.parse(fixture)).toEqual(fixture);
   });
@@ -15,23 +15,18 @@ describe('similarity response boundary', () => {
     fixture.pairs[0]!.results[4]!.score = score;
     expect(similaritySchema.safeParse(fixture).success).toBe(true);
   });
-  it.each([
-    (f: ReturnType<typeof geminiSimilarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => r.method === 'gemini-embeddings' ? { ...r, score: -1.01 } : r) })) }),
-    (f: ReturnType<typeof geminiSimilarityFixture>) => ({ ...f, embeddingRuns: f.embeddingRuns.map((r) => ({ ...r, papers: r.papers.map((p) => ({ ...p, source: 'generated' })) })) }),
-  ])('rejects incompatible Gemini data %#', (change) => {
-    expect(similaritySchema.safeParse(change(geminiSimilarityFixture())).success).toBe(false);
-  });
-  it('accepts local results with both runs in requested order', () => {
+  it('accepts local results after Gemini results in requested order', () => {
     const fixture = localSimilarityFixture();
     expect(similaritySchema.parse(fixture)).toEqual(fixture);
   });
   it.each([
-    (f: ReturnType<typeof localSimilarityFixture>) => ({ ...f, embeddingRuns: f.embeddingRuns.map((r) => r.method === 'local-embeddings' ? { ...r, papers: r.papers.map((p) => ({ ...p, inputTokenCount: 513 })) } : r) }),
-    (f: ReturnType<typeof localSimilarityFixture>) => ({ ...f, embeddingRuns: f.embeddingRuns.map((r) => r.method === 'local-embeddings' ? { ...r, papers: r.papers.map((p) => ({ ...p, inputTokenCount: 0 })) } : r) }),
-    (f: ReturnType<typeof localSimilarityFixture>) => ({ ...f, embeddingRuns: f.embeddingRuns.map((r) => r.method === 'local-embeddings' ? { ...r, papers: r.papers.map((p) => ({ ...p, matchedTokenCount: 5 })) } : r) }),
+    (f: ReturnType<typeof localSimilarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => r.method === 'gemini-embeddings' ? { ...r, score: -1.01 } : r) })) }),
     (f: ReturnType<typeof localSimilarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => r.method === 'local-embeddings' ? { ...r, score: 1.01 } : r) })) }),
-    (f: ReturnType<typeof localSimilarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => r.method === 'local-embeddings' ? { ...r, matchedTokenCount: 5 } : r) })) }),
-  ])('rejects incompatible local data %#', (change) => {
+    (f: ReturnType<typeof localSimilarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => r.method === 'local-embeddings' ? { ...r, model: '' } : r) })) }),
+    (f: ReturnType<typeof localSimilarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => r.method === 'local-embeddings' ? { ...r, modelConfigurationId: 'local-v1' } : r) })) }),
+    (f: ReturnType<typeof localSimilarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => r.method === 'gemini-embeddings' ? { ...r, cosineMilliseconds: 0.5 } : r) })) }),
+    (f: ReturnType<typeof localSimilarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => r.method === 'jaccard' ? { ...r, computeMilliseconds: 0.5 } : r) })) }),
+  ])('rejects incompatible embedding or timing data %#', (change) => {
     expect(similaritySchema.safeParse(change(localSimilarityFixture())).success).toBe(false);
   });
   it('accepts all 190 pairs for the full catalog', () => {
@@ -43,7 +38,8 @@ describe('similarity response boundary', () => {
   it.each([
     (f: ReturnType<typeof similarityFixture>) => ({ ...f, corpusVersion: 'v1' }),
     (f: ReturnType<typeof similarityFixture>) => ({ ...f, methods: ['wrong-method'] }),
-    (f: ReturnType<typeof similarityFixture>) => ({ ...f, embeddingRuns: [{}] }),
+    (f: ReturnType<typeof similarityFixture>) => ({ ...f, embeddingRuns: [] }),
+    (f: ReturnType<typeof similarityFixture>) => ({ ...f, preprocessing: { version: 'tokens-v1' } }),
     (f: ReturnType<typeof similarityFixture>) => ({ ...f, paperIds: ['paper-1', 'paper-1'] }),
     (f: ReturnType<typeof similarityFixture>) => ({ ...f, pairs: [] }),
     (f: ReturnType<typeof similarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => ({ ...r, score: 1.1 })) })) }),

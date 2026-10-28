@@ -96,7 +96,7 @@ export function Similarity() {
         </Field>
         <Button type="button" disabled={catalog.status !== 'ready' || selectedIds.length < 2 || selectedMethods.length === 0 || state.status === 'loading'} loading={state.status === 'loading'} onClick={() => { void run(); }}>Run similarity</Button>
         <p>Classical scores range from 0 to 1. Embedding cosine ranges from -1 to 1. Higher scores indicate greater similarity, not a probability or a plagiarism percentage.</p>
-        <p>Compute times are single Java measurements in milliseconds, not HTTP latency or benchmarks. TF-IDF is fitted on all 20 abstracts. Embedding vectors (Gemini and the local model) are generated once in advance. Embedding compute time measures only the Java cosine calculation.</p>
+        <p>TF-IDF is fitted on all 20 abstracts. Embedding vectors (Gemini and the local model) are generated once in advance and compared with a Java cosine calculation.</p>
       </Card>
       <div className="ranking-output" aria-busy={state.status === 'loading'}>
         {state.status === 'idle' && <Empty><EmptyDescription>No comparison has been run.</EmptyDescription></Empty>}
@@ -111,17 +111,14 @@ function Feedback({ message, error = false }: { message: string; error?: boolean
   if (!error) return <div className="corpus-feedback"><Spinner label={message} /><SpinnerLabel aria-hidden="true">{message}</SpinnerLabel></div>;
   return <Alert role="alert" variant="danger" presentation="note"><AlertBody className="col-span-full"><AlertTitle>Unable to compare</AlertTitle><AlertDescription>{message}</AlertDescription></AlertBody></Alert>;
 }
-function Explanation({ result, data, left, right }: { result: SimilarityResult; data: SimilarityResponse; left: string; right: string }) {
+function Explanation({ result }: { result: SimilarityResult }) {
   switch (result.method) {
     case 'levenshtein': return <><p>Distance: {result.distance}</p><p>Left code points: {result.leftCodePointLength}</p><p>Right code points: {result.rightCodePointLength}</p></>;
     case 'lcs': return <><p>Length: {result.length}</p><p>Left tokens: {result.leftTokenCount}</p><p>Right tokens: {result.rightTokenCount}</p><p>Subsequence: {result.subsequence.join(' ') || 'Empty'}</p></>;
     case 'tf-idf-cosine': return <><p>Dimension: {result.dimension}</p><p>Fit papers: {result.fitPaperCount}</p></>;
     case 'gemini-embeddings':
     case 'local-embeddings': {
-      const run = data.embeddingRuns.find((item) => item.method === result.method)!;
-      const leftPaper = run.papers.find((paper) => paper.paperId === left)!;
-      const rightPaper = run.papers.find((paper) => paper.paperId === right)!;
-      return <><p>Model: {run.configuration.modelId}</p><p>Dimension: {result.dimension}</p><p>Left input tokens: {leftPaper.inputTokenCount}</p><p>Right input tokens: {rightPaper.inputTokenCount}</p></>;
+      return <><p>Model: {result.model}</p><p>Dimension: {result.dimension}</p></>;
     }
     case 'jaccard': return <><p>Intersection: {result.intersectionSize}</p><p>Union: {result.unionSize}</p></>;
   }
@@ -129,7 +126,6 @@ function Explanation({ result, data, left, right }: { result: SimilarityResult; 
 function SimilarityResults({ data, papers }: { data: SimilarityResponse; papers: Papers }) {
   const title = (id: string) => papers.find((paper) => paper.id === id)!.title;
   return <div className="ranking-output">
-    <p>Preprocessing: {data.preprocessing.version}</p>
     <MotionPresence>{data.pairs.map((pair) => {
       const label = `${title(pair.left)} vs ${title(pair.right)}`;
       return <MotionSurface key={JSON.stringify([pair.left, pair.right])} preset="soften" exitDuration={0}>
@@ -137,10 +133,10 @@ function SimilarityResults({ data, papers }: { data: SimilarityResponse; papers:
           <CardHeader><CardTitle>{label}</CardTitle></CardHeader>
           <CardContent><TableContainer><Table aria-label={label}>
             <TableCaption>Similarity results</TableCaption>
-            <TableHeader><TableRow><TableHead>Method</TableHead><TableHead numeric>Score</TableHead><TableHead>Explanation</TableHead><TableHead numeric>Compute time (ms)</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Method</TableHead><TableHead numeric>Score</TableHead><TableHead>Explanation</TableHead></TableRow></TableHeader>
             <TableBody>{pair.results.map((result) => <TableRow key={result.method}>
               <TableCell>{methodLabels[result.method]}</TableCell><TableCell numeric>{result.score.toFixed(4)}</TableCell>
-              <TableCell><Explanation result={result} data={data} left={pair.left} right={pair.right} /></TableCell><TableCell numeric>{result.method === 'gemini-embeddings' || result.method === 'local-embeddings' ? result.cosineMilliseconds : result.computeMilliseconds}</TableCell>
+              <TableCell><Explanation result={result} /></TableCell>
             </TableRow>)}</TableBody>
           </Table></TableContainer></CardContent>
         </Card>

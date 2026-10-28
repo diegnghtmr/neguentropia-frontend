@@ -55,7 +55,7 @@ describe('Similarity screen', () => {
     });
     const row = within(table).getAllByRole('row').at(-1)!;
     expect(row).toHaveTextContent('Gemini embeddings');
-    for (const text of ['-0.1235', 'Model: gemini-embedding-2', 'Dimension: 3072', '0.0625']) expect(within(row).getByText(text)).toBeVisible();
+    for (const text of ['-0.1235', 'Model: gemini-embedding-2', 'Dimension: 3072']) expect(within(row).getByText(text)).toBeVisible();
     expect(screen.getByText(/Classical scores range from 0 to 1/)).toHaveTextContent('Embedding cosine ranges from -1 to 1');
     expect(screen.getByText(/vectors \(Gemini and the local model\) are generated once in advance/)).toBeVisible();
   });
@@ -72,7 +72,8 @@ describe('Similarity screen', () => {
     });
     const row = within(table).getAllByRole('row').at(-1)!;
     expect(row).toHaveTextContent('Local embeddings');
-    for (const text of ['0.8123', 'Model: intfloat/multilingual-e5-small', 'Dimension: 384', 'Left input tokens: 100', 'Right input tokens: 101', '0.03125']) expect(within(row).getByText(text)).toBeVisible();
+    for (const text of ['0.8123', 'Model: intfloat/multilingual-e5-small', 'Dimension: 384']) expect(within(row).getByText(text)).toBeVisible();
+    expect(row).not.toHaveTextContent('input tokens');
     expect(screen.getByText(/generated once in advance/)).toHaveTextContent('Gemini and the local model');
   });
   it('shows the provider-unavailable message for local embeddings on 503', async () => {
@@ -88,12 +89,12 @@ describe('Similarity screen', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
     expect(post).toHaveBeenCalledTimes(1);
   });
-  it('renders pair titles, ordered rows, scores, explanations and Java timing', async () => {
+  it('renders pair titles, ordered rows, scores and explanations', async () => {
     render(<Similarity />); await selectPair(); run();
     const table = await screen.findByRole('table', { name: 'Paper 1 vs Paper 2' });
     const rows = within(table).getAllByRole('row').slice(1);
     expect(rows.map((r) => within(r).getAllByRole('cell')[0]?.textContent)).toEqual(['Levenshtein', 'LCS', 'TF-IDF cosine', 'Jaccard']);
-    for (const text of ['0.5000', '0.6667', '0.6694', '0.3333', '0.125', '0.25', '0.375']) expect(within(table).getByText(text)).toBeVisible();
+    for (const text of ['0.5000', '0.6667', '0.6694', '0.3333']) expect(within(table).getByText(text)).toBeVisible();
     expect(rows[0]).toHaveTextContent('Distance: 1');
     expect(rows[0]).toHaveTextContent('Left code points: 2');
     expect(rows[1]).toHaveTextContent('Length: 2');
@@ -101,6 +102,8 @@ describe('Similarity screen', () => {
     expect(rows[2]).toHaveTextContent('Dimension: 4');
     expect(rows[3]).toHaveTextContent('Intersection: 1');
     expect(rows[3]).toHaveTextContent('Union: 3');
+    expect(within(table).queryByText('Compute time (ms)')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Preprocessing/)).not.toBeInTheDocument();
   });
   it('renders every received pair for three selected papers', async () => {
     const f = similarityFixture();
