@@ -41,6 +41,7 @@
 @import "@/styles/cojeev/empty.css";
 @import "@/styles/cojeev/checkbox.css";
 @import "@/styles/cojeev/choice-foundations.css";
+@import "@/styles/cojeev/input.css";
 
 @custom-variant dark (&:is(.dark *));
 
