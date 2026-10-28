@@ -96,7 +96,7 @@ describe('Similarity screen', () => {
     expect(rows.map((r) => within(r).getAllByRole('cell')[0]?.textContent)).toEqual(['Levenshtein', 'LCS', 'TF-IDF cosine', 'Jaccard']);
     for (const text of ['0.5000', '0.6667', '0.6694', '0.3333']) expect(within(table).getByText(text)).toBeVisible();
     expect(rows[0]).toHaveTextContent('Distance: 1');
-    expect(rows[0]).toHaveTextContent('Left code points: 2');
+    expect(rows[0]).toHaveTextContent('Left length: 2');
     expect(rows[1]).toHaveTextContent('Length: 2');
     expect(rows[1]).toHaveTextContent('Left tokens: 3');
     expect(rows[2]).toHaveTextContent('Dimension: 4');

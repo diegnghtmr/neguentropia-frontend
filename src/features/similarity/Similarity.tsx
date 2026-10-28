@@ -113,7 +113,7 @@ function Feedback({ message, error = false }: { message: string; error?: boolean
 }
 function Explanation({ result }: { result: SimilarityResult }) {
   switch (result.method) {
-    case 'levenshtein': return <><p>Distance: {result.distance}</p><p>Left code points: {result.leftCodePointLength}</p><p>Right code points: {result.rightCodePointLength}</p></>;
+    case 'levenshtein': return <><p>Distance: {result.distance}</p><p>Left length: {result.leftLength}</p><p>Right length: {result.rightLength}</p></>;
     case 'lcs': return <><p>Length: {result.length}</p><p>Left tokens: {result.leftTokenCount}</p><p>Right tokens: {result.rightTokenCount}</p><p>Subsequence: {result.subsequence.join(' ') || 'Empty'}</p></>;
     case 'tf-idf-cosine': return <><p>Dimension: {result.dimension}</p><p>Fit papers: {result.fitPaperCount}</p></>;
     case 'gemini-embeddings':

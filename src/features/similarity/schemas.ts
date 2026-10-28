@@ -7,8 +7,8 @@ const paperId = z.string().min(1);
 const count = z.number().int().nonnegative();
 const score = z.number().min(0).max(1);
 const result = z.discriminatedUnion('method', [
-  z.strictObject({ method: z.literal('levenshtein'), representation: z.literal('joined-token-code-points'), score,
-    distance: count, leftCodePointLength: count, rightCodePointLength: count }),
+  z.strictObject({ method: z.literal('levenshtein'), representation: z.literal('joined-tokens'), score,
+    distance: count, leftLength: count, rightLength: count }),
   z.strictObject({ method: z.literal('lcs'), representation: z.literal('tokens'), score,
     length: count, subsequence: z.array(z.string().min(1)), leftTokenCount: count, rightTokenCount: count }),
   z.strictObject({ method: z.literal('tf-idf-cosine'), representation: z.literal('global-tf-idf'), score,

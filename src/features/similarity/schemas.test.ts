@@ -42,6 +42,8 @@ describe('similarity response boundary', () => {
     (f: ReturnType<typeof similarityFixture>) => ({ ...f, preprocessing: { version: 'tokens-v1' } }),
     (f: ReturnType<typeof similarityFixture>) => ({ ...f, paperIds: ['paper-1', 'paper-1'] }),
     (f: ReturnType<typeof similarityFixture>) => ({ ...f, pairs: [] }),
+    (f: ReturnType<typeof similarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => (r.method === 'levenshtein' ? { ...r, representation: 'joined-token-code-points' } : r)) })) }),
+    (f: ReturnType<typeof similarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => (r.method === 'levenshtein' ? { ...r, leftCodePointLength: 2, rightCodePointLength: 2 } : r)) })) }),
     (f: ReturnType<typeof similarityFixture>) => ({ ...f, pairs: f.pairs.map((p) => ({ ...p, results: p.results.map((r) => ({ ...r, score: 1.1 })) })) }),
   ])('rejects incompatible data %#', (change) => {
     expect(similaritySchema.safeParse(change(similarityFixture())).success).toBe(false);
