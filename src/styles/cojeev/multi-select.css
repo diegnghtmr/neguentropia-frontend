@@ -1,0 +1,44 @@
+@layer cojeev-states {
+.v-multi-select { display:grid; gap:var(--s-3); min-width:0; width:100%; }
+.v-multi-select .v-multi-select__trigger { width:100%; min-height:var(--ctl-lg); height:auto; padding:var(--s-3) var(--s-4); justify-content:space-between; gap:var(--s-3); text-align:start; }
+.v-multi-select__trigger > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.v-multi-select__trigger > .v-icon { flex:none; width:18px; height:18px; }
+.v-multi-select[data-invalid] .v-multi-select__trigger { box-shadow:inset 0 0 0 1px var(--v-danger); }
+.v-multi-select[data-disabled] { opacity:.6; }
+.v-multi-select__popover.v-popover { width:var(--radix-popover-trigger-width); min-width:min(260px,calc(100vw - 32px)); max-width:calc(100vw - 32px); padding:var(--s-3); display:grid; gap:var(--s-3); }
+.v-multi-select__options { display:grid; gap:var(--s-1); min-width:0; overscroll-behavior:contain; }
+.v-multi-select__option { display:flex; align-items:center; gap:var(--s-3); min-height:var(--hit-min); padding:var(--s-1) var(--s-2); border-radius:var(--r-sm); }
+.v-multi-select__option:hover:not([data-disabled]) { background:var(--v-beige); }
+.v-multi-select__option > label { flex:1; min-width:0; padding-block:var(--s-2); font-size:var(--fs-control); line-height:1.4; cursor:pointer; overflow-wrap:anywhere; }
+.v-multi-select__option[data-disabled] { opacity:.5; }
+.v-multi-select__option[data-disabled] > label { cursor:not-allowed; }
+.v-multi-select__option:focus-within { outline:2px solid var(--ring); outline-offset:-2px; }
+.v-multi-select__tokens { list-style:none; display:flex; flex-wrap:wrap; gap:var(--s-2); margin:0; padding:0; min-width:0; }
+.v-multi-select__tokens > li { min-width:0; max-width:100%; }
+.v-multi-select .v-multi-select__token { min-height:32px; height:auto; max-width:100%; padding:3px var(--s-1) 3px var(--s-3); gap:var(--s-2); }
+.v-multi-select__token-label { min-width:0; overflow-wrap:anywhere; white-space:normal; line-height:1.3; }
+.v-multi-select .v-multi-select__remove { width:44px; min-width:44px; height:44px; padding:0; flex:none; }
+.v-multi-select__remove > .v-icon { width:14px; height:14px; }
+.v-multi-select__description, .v-multi-select__error, .v-multi-select__hint, .v-multi-select__empty { margin:0; font-size:var(--fs-meta); line-height:1.5; }
+.v-multi-select__description, .v-multi-select__hint, .v-multi-select__empty { color:var(--v-text-2); }
+.v-multi-select__error { color:var(--v-danger-ink); }
+.v-multi-select__empty { padding:var(--s-4) var(--s-2); text-align:center; }
+@media (prefers-reduced-motion:reduce) { .v-multi-select *, .v-multi-select__popover * { transition-duration:0s; animation-duration:0s; } }
+
+.v-multi-select__option > label { display:flex; flex:1; align-items:center; gap:var(--s-3); min-width:0; }
+.v-multi-select__option > label > span:not(.v-item-adornment) { min-width:0; overflow-wrap:anywhere; }
+.v-multi-select__option { min-height:46px; }
+.v-multi-select__option:active:not([data-disabled]) { background:var(--v-pink-soft); color:var(--v-text); }
+.v-multi-select__checklist { display:grid; gap:var(--s-3); min-width:0; padding:var(--s-4); border:1px solid var(--v-edge); border-radius:min(var(--v-control-radius,20px),20px); background:var(--v-canvas); }
+.v-multi-select[data-appearance="inset"] .v-multi-select__checklist { background:var(--v-beige); border-color:transparent; box-shadow:inset 0 1px 2px color-mix(in oklab,var(--v-text) 12%,transparent); }
+.v-multi-select[data-appearance="editorial"] .v-multi-select__checklist { border:0; border-radius:0; padding:0; background:transparent; }
+.v-multi-select__trigger > .v-multi-select__value { display:grid; gap:3px; min-width:0; white-space:normal; }
+.v-multi-select__value > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.v-multi-select__value > small { font-size:var(--fs-meta); color:var(--v-text-2); line-height:1.4; }
+.v-multi-select[data-invalid] .v-multi-select__checklist { outline:2px solid var(--v-danger-ink); outline-offset:2px; }
+.v-multi-select__option[data-selected] { background:var(--v-pink-soft); }
+.v-multi-select__unavailable { display:flex; flex-wrap:wrap; gap:var(--s-2); min-width:0; }
+.v-multi-select__unavailable > p { flex-basis:100%; }
+.v-multi-select__unavailable > .v-btn { min-height:44px; max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+
+}
