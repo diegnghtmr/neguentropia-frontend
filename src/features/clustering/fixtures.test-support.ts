@@ -28,13 +28,17 @@ function merges(scale: number) {
   });
 }
 
+function cuts(silhouette: number) {
+  return Array.from({ length: 18 }, (_, i) => ({ clusterCount: i + 2, silhouette: Math.round((silhouette - 0.01 * i) * 1000000) / 1000000 }));
+}
+
 export function clusteringFixture() {
   return {
     leaves: Array.from({ length: leafCount }, (_, i) => ({ id: i, paperId: `paper-${i + 1}` })),
     results: [
-      { method: 'single-linkage', merges: merges(0.5), silhouette: 0.1234, partition: partitionFixture() },
-      { method: 'complete-linkage', merges: merges(1), silhouette: 0.4321, partition: partitionFixture() },
-      { method: 'average-linkage', merges: merges(0.75), silhouette: 0.2222, partition: partitionFixture() },
+      { method: 'single-linkage', merges: merges(0.5), silhouette: 0.1234, silhouettesByCut: cuts(0.1234), partition: partitionFixture() },
+      { method: 'complete-linkage', merges: merges(1), silhouette: 0.4321, silhouettesByCut: cuts(0.4321), partition: partitionFixture() },
+      { method: 'average-linkage', merges: merges(0.75), silhouette: 0.2222, silhouettesByCut: cuts(0.2222), partition: partitionFixture() },
     ],
   };
 }

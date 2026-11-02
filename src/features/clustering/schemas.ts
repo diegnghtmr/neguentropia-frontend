@@ -13,11 +13,16 @@ const merge = z.strictObject({
 const cluster = z.strictObject({
   paperIds: z.array(paperId).min(1).max(19),
 });
+const cutSilhouette = z.strictObject({
+  clusterCount: z.number().int().min(2).max(19),
+  silhouette: z.number().min(-1).max(1),
+});
 const result = z.strictObject({
   method: z.enum(clusteringMethods),
   merges: z.array(merge).length(19),
   partition: z.array(cluster).min(2).max(19),
   silhouette: z.number().min(-1).max(1),
+  silhouettesByCut: z.array(cutSilhouette).length(18),
 });
 export const clusteringSchema = z.strictObject({
   leaves: z.array(leaf).length(20),

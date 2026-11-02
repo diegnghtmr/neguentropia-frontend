@@ -87,6 +87,8 @@ body { min-width: 20rem; }
 .search-timings caption { text-align: left; white-space: normal; width: 0; min-width: 100%; }
 mark { background: var(--v-yellow); color: var(--v-on-accent); font-weight: var(--fw-semibold); padding-inline: .2em; border-radius: var(--r-xs); box-shadow: 0 0 0 1px var(--v-yellow-deep); }
 .dendrogram-scroll { overflow-x: auto; }
+.silhouette-legend { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); padding: 0; list-style: none; }
+.silhouette-legend li { display: inline-flex; align-items: center; gap: var(--s-2); }
 .paper-id { display: inline-block; padding: 0 var(--s-2); border-radius: 999px; font-size: var(--fs-small); font-weight: 600; }
 .group-blocks { display: grid; gap: var(--s-3); padding: 0; list-style: none; }
 .group-block { display: grid; gap: var(--s-3); padding: var(--s-4); border-radius: var(--r-md); }

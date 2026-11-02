@@ -14,6 +14,7 @@ describe('clustering response boundary', () => {
     ['leaf', (f: ReturnType<typeof clusteringFixture>) => ({ ...f, leaves: f.leaves.map((l, i) => i === 0 ? { ...l, label: 'x' } : l) })],
     ['result', (f: ReturnType<typeof clusteringFixture>) => ({ ...f, results: f.results.map((r, i) => i === 0 ? { ...r, ms: 1 } : r) })],
     ['merge', (f: ReturnType<typeof clusteringFixture>) => ({ ...f, results: f.results.map((r, i) => i === 0 ? { ...r, merges: r.merges.map((m, j) => j === 0 ? { ...m, extra: 1 } : m) } : r) })],
+    ['cut silhouette', (f: ReturnType<typeof clusteringFixture>) => ({ ...f, results: f.results.map((r, i) => i === 0 ? { ...r, silhouettesByCut: r.silhouettesByCut.map((c, j) => j === 0 ? { ...c, extra: 1 } : c) } : r) })],
     ['cluster', (f: ReturnType<typeof clusteringFixture>) => ({ ...f, results: f.results.map((r, i) => i === 0 ? { ...r, partition: r.partition.map((c, j) => j === 0 ? { ...c, extra: 1 } : c) } : r) })],
   ])('rejects extra fields in the %s', (_name, change) => {
     expect(clusteringSchema.safeParse(change(clusteringFixture())).success).toBe(false);
@@ -21,6 +22,8 @@ describe('clustering response boundary', () => {
   it.each([
     ['wrong method order', (f: ReturnType<typeof clusteringFixture>) => ({ ...f, results: [f.results[1], f.results[0], f.results[2]] })],
     ['two results', (f: ReturnType<typeof clusteringFixture>) => ({ ...f, results: f.results.slice(0, 2) })],
+    ['missing silhouettes by cut', (f: ReturnType<typeof clusteringFixture>) => ({ ...f, results: f.results.map((r, i) => i === 0 ? { ...r, silhouettesByCut: r.silhouettesByCut.slice(1) } : r) })],
+    ['cut silhouette below minus one', (f: ReturnType<typeof clusteringFixture>) => ({ ...f, results: f.results.map((r, i) => i === 0 ? { ...r, silhouettesByCut: r.silhouettesByCut.map((c, j) => j === 0 ? { ...c, silhouette: -1.5 } : c) } : r) })],
     ['silhouette above one', (f: ReturnType<typeof clusteringFixture>) => ({ ...f, results: f.results.map((r, i) => i === 0 ? { ...r, silhouette: 1.1 } : r) })],
     ['height above one', (f: ReturnType<typeof clusteringFixture>) => ({ ...f, results: f.results.map((r, i) => i === 0 ? { ...r, merges: r.merges.map((m, j) => j === 18 ? { ...m, height: 1.5 } : m) } : r) })],
   ])('rejects %s', (_name, change) => {

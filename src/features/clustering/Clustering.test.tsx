@@ -95,6 +95,16 @@ describe('Clustering screen', () => {
     expect(within(rows[1]!).getAllByRole('cell')[1]).toHaveClass('-num');
     expect(table.compareDocumentPosition(screen.getAllByRole('img')[0]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
+  it('shows the silhouette of every cut below the method cards with the chosen cut marked', async () => {
+    render(<Clustering />);
+    await choose('2');
+    run();
+    await screen.findAllByRole('img');
+    const chart = screen.getByRole('graphics-document');
+    expect(chart.querySelector('[data-cut]')).toHaveAttribute('data-cut', '2');
+    expect(screen.getByRole('table', { name: 'Silueta para todos los cortes' })).toBeVisible();
+    expect(screen.getAllByRole('img')[2]!.compareDocumentPosition(chart) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
   it('says so when silhouettes are tied', async () => {
     const tied = clusteringFixture();
     for (const result of tied.results) {

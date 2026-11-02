@@ -14,6 +14,7 @@ import { Skeleton, SkeletonGroup } from '@/shared/ui/skeleton';
 import { MotionSurface } from '@/shared/ui/presence';
 import { loadClustering } from './client';
 import { Dendrogram } from './Dendrogram';
+import { SilhouetteCuts } from './SilhouetteCuts';
 import { MergeTable } from './MergeTable';
 import { groupColor, groupSoft, pillInk } from './groupColors';
 import { apiErrorSchema, type ClusteringMethod, type ClusteringResponse, type ClusteringResult } from './schemas';
@@ -207,5 +208,6 @@ function ClusteringResults({ data, papers }: { data: ClusteringResponse; papers:
         </CardContent>
       </Card>
     </MotionSurface>)}
+    <SilhouetteCuts results={data.results} clusterCount={data.results[0].partition.length} />
   </div>;
 }
