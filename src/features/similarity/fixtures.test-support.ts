@@ -36,3 +36,27 @@ export function similarityFixture() {
     ] }],
   };
 }
+export function stepsFixture() {
+  const idf = Math.log(10);
+  return {
+    leftId: 'paper-1', rightId: 'paper-2',
+    levenshtein: { leftPrefix: 'a b', rightPrefix: 'ab', cells: [[0, 1, 2], [1, 0, 1], [2, 1, 1], [3, 2, 1]], distance: 7, leftLength: 12, rightLength: 10, score: 1 - 7 / 12 },
+    lcs: { leftTokens: ['ai', 'ml'], rightTokens: ['ml', 'ai'], cells: [[0, 0, 0], [0, 0, 1], [0, 1, 1]], length: 4, leftTokenCount: 9, rightTokenCount: 7, score: 0.5 },
+    tfIdf: {
+      terms: [
+        { term: 'identifying', leftCount: 1, rightCount: 2, documentFrequency: 2, idf, leftWeight: idf / 4, rightWeight: idf / 2, product: idf * idf / 8 },
+        { term: 'content', leftCount: 2, rightCount: 1, documentFrequency: 5, idf: Math.log(4), leftWeight: 0.0128767, rightWeight: 0.00948, product: 0.00012207255 },
+      ],
+      dotProduct: 0.0009636616, leftNorm: 0.136847, rightNorm: 0.128832, cosine: 0.25, angleDegrees: 75.5224878,
+    },
+  };
+}
+export function matrixFixture() {
+  const f = similarityFixture();
+  const r = f.pairs[0]!.results;
+  const pair = (left: string, right: string, scores: number[]) => ({ left, right, results: r.map((x, i) => ({ ...x, score: scores[i]! })) });
+  return {
+    ...f, paperIds: ['paper-1', 'paper-2', 'paper-3'],
+    pairs: [pair('paper-1', 'paper-2', [0.5, 0.6, 0.7, 0.8]), pair('paper-1', 'paper-3', [0.1, 0.2, 0.3, 0.4]), pair('paper-2', 'paper-3', [0.15, 0.25, 0.35, 0.45])],
+  };
+}

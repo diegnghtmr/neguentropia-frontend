@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import axios from 'axios';
-import { z } from 'zod';
 import { loadCatalog } from '../corpus/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Badge } from '@/shared/ui/badge';
@@ -14,27 +12,15 @@ import { Empty, EmptyDescription } from '@/shared/ui/empty';
 import { Skeleton, SkeletonGroup } from '@/shared/ui/skeleton';
 import { MotionPresence, MotionSurface } from '@/shared/ui/presence';
 import { loadSimilarity } from './client';
-import { apiErrorSchema, similarityMethods, type SimilarityMethod, type SimilarityResponse, type SimilarityResult } from './schemas';
+import { errorMessage } from './messages';
+import { SimilarityMatrix } from './SimilarityMatrix';
+import { SimilarityStepsView } from './SimilarityStepsView';
+import { methodLabels } from './methods';
+import { similarityMethods, type SimilarityMethod, type SimilarityResponse, type SimilarityResult } from './schemas';
 
 type Papers = Awaited<ReturnType<typeof loadCatalog>>['papers'];
 type CatalogState = { status: 'loading' } | { status: 'ready'; papers: Papers } | { status: 'error'; message: string };
 type State = { status: 'idle' | 'loading' } | { status: 'ready'; data: SimilarityResponse } | { status: 'error'; message: string };
-const methodLabels: Record<SimilarityMethod, string> = { levenshtein: 'Levenshtein', lcs: 'LCS', 'tf-idf-cosine': 'Coseno TF-IDF', jaccard: 'Jaccard', 'gemini-embeddings': 'Embeddings de Gemini', 'local-embeddings': 'Embeddings locales' };
-const apiMessages = {
-  INVALID_INPUT: 'La solicitud no es válida. Revisa los artículos y los métodos elegidos.',
-  PAPER_NOT_FOUND: 'No se encontró alguno de los artículos elegidos. Recarga la página para actualizar el catálogo.',
-  CORPUS_UNAVAILABLE: 'El corpus no está disponible. No se puede calcular la similitud.',
-  PROVIDER_UNAVAILABLE: 'Los vectores de embeddings no están disponibles. Prueba con otros métodos.',
-  INTERNAL_ERROR: 'El servidor tuvo un error al calcular la similitud. Inténtalo de nuevo más tarde.',
-};
-function errorMessage(error: unknown) {
-  if (error instanceof z.ZodError) return 'El backend devolvió una respuesta no válida.';
-  if (axios.isAxiosError<unknown>(error)) {
-    const parsed = apiErrorSchema.safeParse(error.response?.data);
-    if (parsed.success) return apiMessages[parsed.data.code];
-  }
-  return 'No se pudo completar la solicitud. Revisa la conexión y la configuración del backend.';
-}
 
 export function Similarity() {
   const [catalog, setCatalog] = useState<CatalogState>({ status: 'loading' });
@@ -170,6 +156,7 @@ function Explanation({ result }: { result: SimilarityResult }) {
 function SimilarityResults({ data, papers }: { data: SimilarityResponse; papers: Papers }) {
   const title = (id: string) => papers.find((paper) => paper.id === id)!.title;
   return <div className="ranking-output">
+    <SimilarityMatrix data={data} />
     <MotionPresence>{data.pairs.map((pair) => {
       const label = `${title(pair.left)} vs ${title(pair.right)}`;
       return <MotionSurface key={JSON.stringify([pair.left, pair.right])} preset="soften" exitDuration={0}>
@@ -177,14 +164,15 @@ function SimilarityResults({ data, papers }: { data: SimilarityResponse; papers:
           <CardHeader><CardTitle className="similarity-pair" aria-label={label}>
             <span>{title(pair.left)}</span><Badge variant="ink" aria-hidden="true">vs</Badge><span>{title(pair.right)}</span>
           </CardTitle></CardHeader>
-          <CardContent><TableContainer><Table aria-label={label}>
+          <CardContent><TableContainer><Table aria-label={label} className="similarity-pair-table">
             <TableHeader><TableRow><TableHead>Método</TableHead><TableHead numeric>Puntaje</TableHead><TableHead>Explicación</TableHead></TableRow></TableHeader>
             <TableBody>{pair.results.map((result) => <TableRow key={result.method}>
               <TableCell>{methodLabels[result.method]}</TableCell><TableCell numeric>{result.score.toFixed(4)}</TableCell>
               <TableCell><Explanation result={result} /></TableCell>
             </TableRow>)}</TableBody>
             <TableCaption className="caption-bottom">Los puntajes clásicos van de 0 a 1 y los cosenos de embeddings, de -1 a 1.</TableCaption>
-          </Table></TableContainer></CardContent>
+          </Table></TableContainer>
+          <SimilarityStepsView leftId={pair.left} rightId={pair.right} /></CardContent>
         </Card>
       </MotionSurface>;
     })}</MotionPresence>

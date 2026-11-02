@@ -36,3 +36,25 @@ export type SimilarityRequest = { paperIds: string[]; methods: SimilarityMethod[
 export type SimilarityResponse = z.infer<typeof similaritySchema>;
 export type SimilarityResult = z.infer<typeof result>;
 export type SimilarityMethod = z.infer<typeof method>;
+const matrix = z.array(z.array(count));
+export const stepsSchema = z.strictObject({
+  leftId: paperId, rightId: paperId,
+  levenshtein: z.strictObject({
+    leftPrefix: z.string().max(8), rightPrefix: z.string().max(8), cells: matrix,
+    distance: count, leftLength: count, rightLength: count, score,
+  }),
+  lcs: z.strictObject({
+    leftTokens: z.array(z.string()).max(6), rightTokens: z.array(z.string()).max(6), cells: matrix,
+    length: count, leftTokenCount: count, rightTokenCount: count, score,
+  }),
+  tfIdf: z.strictObject({
+    terms: z.array(z.strictObject({
+      term: z.string(), leftCount: z.number().int().min(1), rightCount: z.number().int().min(1),
+      documentFrequency: z.number().int().min(1).max(20), idf: z.number(), leftWeight: z.number(),
+      rightWeight: z.number(), product: z.number(),
+    })).max(8),
+    dotProduct: z.number(), leftNorm: z.number(), rightNorm: z.number(), cosine: z.number(), angleDegrees: z.number(),
+  }),
+});
+export type SimilarityStepsRequest = { leftId: string; rightId: string };
+export type SimilaritySteps = z.infer<typeof stepsSchema>;

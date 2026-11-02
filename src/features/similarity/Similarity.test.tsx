@@ -17,6 +17,7 @@ afterEach(() => {
   if (originalAdapter === undefined) delete http.defaults.adapter;
   else http.defaults.adapter = originalAdapter;
 });
+const pairTable = /^Paper \d+ vs Paper \d+$/;
 const scales = 'Los puntajes clásicos van de 0 a 1 y los cosenos de embeddings, de -1 a 1.';
 const run = () => fireEvent.click(screen.getByRole('button', { name: 'Calcular similitud' }));
 const check = (name: string) => fireEvent.click(screen.getByRole('checkbox', { name }));
@@ -53,7 +54,7 @@ describe('Similarity screen', () => {
     check('Jaccard'); check('LCS');
     const f = similarityFixture();
     post.mockImplementation(async (config) => ({ data: { ...f, methods: ['lcs', 'jaccard'], pairs: f.pairs.map((p) => ({ ...p, results: p.results.filter((r) => ['lcs', 'jaccard'].includes(r.method)) })) }, status: 200, statusText: 'OK', headers: {}, config }));
-    run(); await screen.findByRole('table');
+    run(); await screen.findByRole('table', { name: pairTable });
     expect(JSON.parse(post.mock.calls[0]![0].data as string)).toEqual({ paperIds: ['paper-1', 'paper-2'], methods: ['lcs', 'jaccard'] });
     expect(post).toHaveBeenCalledTimes(1);
   });
@@ -97,17 +98,17 @@ describe('Similarity screen', () => {
     fireEvent.click(all);
     expect(screen.getByRole('button', { name: 'Artículos' })).toHaveTextContent('20 seleccionados');
     expect(screen.queryByRole('button', { name: 'Seleccionar los 20' })).not.toBeInTheDocument();
-    run(); await screen.findByRole('table');
+    run(); await screen.findByRole('table', { name: pairTable });
     expect(JSON.parse(post.mock.calls[0]![0].data as string).paperIds).toEqual(Array.from({ length: 20 }, (_, i) => `paper-${i + 1}`));
     fireEvent.click(screen.getByRole('button', { name: 'Quitar todos' }));
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByRole('table', { name: pairTable })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Artículos' })).toHaveTextContent('Elige dos o más');
     expect(screen.getByRole('button', { name: 'Seleccionar los 20' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Calcular similitud' })).toBeDisabled();
   });
   it('sends the ids in corpus order whatever the click order', async () => {
     render(<Similarity />);
-    await pickPapers(5, 3, 9); run(); await screen.findByRole('table');
+    await pickPapers(5, 3, 9); run(); await screen.findByRole('table', { name: pairTable });
     expect(JSON.parse(post.mock.calls[0]![0].data as string).paperIds).toEqual(['paper-3', 'paper-5', 'paper-9']);
   });
   it('shows the selected count only in the field, once', async () => {
@@ -122,7 +123,7 @@ describe('Similarity screen', () => {
     const f = similarityFixture();
     post.mockImplementation(async (config) => ({ data: { ...f, paperIds: ['paper-1', 'paper-2', 'paper-3'], pairs: [f.pairs[0]!, { ...f.pairs[0]!, left: 'paper-1', right: 'paper-3' }] }, status: 200, statusText: 'OK', headers: {}, config }));
     render(<Similarity />); await selectPair(); await pickPapers(3); run();
-    const tables = await screen.findAllByRole('table');
+    const tables = await screen.findAllByRole('table', { name: pairTable });
     expect(screen.getAllByText(scales)).toHaveLength(2);
     for (const table of tables) {
       expect(within(table).getByText(scales).tagName).toBe('CAPTION');
@@ -141,7 +142,7 @@ describe('Similarity screen', () => {
     await selectPair();
     check('Embeddings locales'); check('LCS'); check('LCS');
     run();
-    const table = await screen.findByRole('table');
+    const table = await screen.findByRole('table', { name: pairTable });
     expect(JSON.parse(post.mock.calls[0]![0].data as string)).toEqual({
       paperIds: ['paper-1', 'paper-2'], methods: ['levenshtein', 'lcs', 'tf-idf-cosine', 'jaccard', 'gemini-embeddings'],
     });
@@ -156,7 +157,7 @@ describe('Similarity screen', () => {
     render(<Similarity />);
     await selectPair();
     run();
-    const table = await screen.findByRole('table');
+    const table = await screen.findByRole('table', { name: pairTable });
     expect(JSON.parse(post.mock.calls[0]![0].data as string)).toEqual({
       paperIds: ['paper-1', 'paper-2'], methods: ['levenshtein', 'lcs', 'tf-idf-cosine', 'jaccard', 'gemini-embeddings', 'local-embeddings'],
     });
@@ -169,13 +170,13 @@ describe('Similarity screen', () => {
     post.mockImplementation(async (config) => { throw new AxiosError('Request failed', undefined, config, undefined, { data: { code: 'PROVIDER_UNAVAILABLE', message: 'Local vectors are unavailable.' }, status: 503, statusText: 'Unavailable', headers: {}, config }); });
     render(<Similarity />); await selectPair(); run();
     expect(await screen.findByRole('alert')).toHaveTextContent('Los vectores de embeddings no están disponibles. Prueba con otros métodos.');
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByRole('table', { name: pairTable })).not.toBeInTheDocument();
   });
   it('shows the Spanish provider-unavailable message for Gemini on 503', async () => {
     post.mockImplementation(async (config) => { throw new AxiosError('Request failed', undefined, config, undefined, { data: { code: 'PROVIDER_UNAVAILABLE', message: 'Gemini vectors are unavailable.' }, status: 503, statusText: 'Unavailable', headers: {}, config }); });
     render(<Similarity />); await selectPair(); run();
     expect(await screen.findByRole('alert')).toHaveTextContent('Los vectores de embeddings no están disponibles. Prueba con otros métodos.');
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByRole('table', { name: pairTable })).not.toBeInTheDocument();
     expect(post).toHaveBeenCalledTimes(1);
   });
   it('shows the two compared papers apart with a vs marker', async () => {
@@ -209,21 +210,21 @@ describe('Similarity screen', () => {
       f.pairs[0]!, { ...f.pairs[0]!, left: 'paper-1', right: 'paper-3' }, { ...f.pairs[0]!, left: 'paper-2', right: 'paper-3' },
     ] }, status: 200, statusText: 'OK', headers: {}, config }));
     render(<Similarity />); await selectPair(); await pickPapers(3); run();
-    expect((await screen.findAllByRole('table')).map((table) => table.getAttribute('aria-label'))).toEqual([
+    expect((await screen.findAllByRole('table', { name: pairTable })).map((table) => table.getAttribute('aria-label'))).toEqual([
       'Paper 1 vs Paper 2', 'Paper 1 vs Paper 3', 'Paper 2 vs Paper 3',
     ]);
   });
   it.each(['Paper 1', 'Jaccard'])('clears the previous result when %s changes', async (name) => {
-    render(<Similarity />); await selectPair(); run(); await screen.findByRole('table');
+    render(<Similarity />); await selectPair(); run(); await screen.findByRole('table', { name: pairTable });
     if (name === 'Paper 1') fireEvent.click(screen.getByRole('button', { name: 'Quitar paper-1 Paper 1' }));
     else check(name);
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByRole('table', { name: pairTable })).not.toBeInTheDocument();
   });
   it('shows the Spanish message for the error code without retaining a prior result', async () => {
-    render(<Similarity />); await selectPair(); run(); await screen.findByRole('table');
+    render(<Similarity />); await selectPair(); run(); await screen.findByRole('table', { name: pairTable });
     post.mockImplementation(async (config) => { throw new AxiosError('Request failed', undefined, config, undefined, { data: { code: 'CORPUS_UNAVAILABLE', message: 'The paper corpus is unavailable.' }, status: 503, statusText: 'Unavailable', headers: {}, config }); });
     run(); expect(await screen.findByRole('alert')).toHaveTextContent('El corpus no está disponible. No se puede calcular la similitud.');
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByRole('table', { name: pairTable })).not.toBeInTheDocument();
   });
   it('blocks duplicate runs and discards a response after selection changes', async () => {
     let resolve!: (value: Awaited<ReturnType<AxiosAdapter>>) => void;
@@ -240,6 +241,6 @@ describe('Similarity screen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Quitar paper-1 Paper 1' }));
     expect(config.signal?.aborted).toBe(true);
     await act(async () => { resolve({ data: similarityFixture(), status: 200, statusText: 'OK', headers: {}, config }); });
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByRole('table', { name: pairTable })).not.toBeInTheDocument();
   });
 });
