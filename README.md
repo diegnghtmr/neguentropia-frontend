@@ -42,7 +42,7 @@ Scripts:
 
 ## Ranking view
 
-Use the Corpus, Ranking, Similitud, Agrupamiento and Búsqueda tabs (pointer, arrow keys or Home/End) to switch views. The corpus reader keeps its selection. Ranking runs only when **Ejecutar ranking** is pressed and POSTs `{}` to `/api/ranking` through the shared Axios client. A strict Zod boundary validates the corpus, preprocessing, parameters and three ordered results before rendering.
+Use the Corpus, Ranking, Similitud, Agrupamiento and Búsqueda tabs (pointer, arrow keys or Home/End) to switch views. Every view stays mounted, so switching tabs keeps its selection, pattern and results without new requests. The catalog is requested once per page load and shared by all views, and each abstract is downloaded once; a failed request is not kept, so it is retried the next time it is needed. Pressing **Buscar** again runs the search again, because every run measures its own preprocessing and search times. Ranking runs only when **Ejecutar ranking** is pressed and POSTs `{}` to `/api/ranking` through the shared Axios client. A strict Zod boundary validates the corpus, preprocessing, parameters and three ordered results before rendering.
 
 Each method has a top-15 table (or all available terms when fewer than 15 exist), preserving Java's term order, ties and frequencies exactly. Run details show the preprocessing settings returned by the backend, the fixed 20-abstract scope, sizes, Radix base and Bucket parameters. Durations are Java single-run sorting times in **ms**, not benchmarks, HTTP latency or browser render times. Tables use the existing Cojeev visual language without adding chart dependencies.
 

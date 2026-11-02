@@ -5,10 +5,25 @@ import App from './App';
 vi.mock('../features/corpus', () => ({ Corpus: () => <section aria-label="Corpus">Corpus reader</section> }));
 vi.mock('../features/ranking', () => ({ Ranking: () => <section aria-label="Ranking">Ranking screen</section> }));
 vi.mock('../features/clustering', () => ({ Clustering: () => <section aria-label="Agrupamiento">Clustering screen</section> }));
-vi.mock('../features/search', () => ({ Search: () => <section aria-label="Búsqueda">Search screen</section> }));
+const searchMounts = vi.hoisted(() => ({ count: 0 }));
+vi.mock('../features/search', async () => {
+  const { useEffect } = await import('react');
+  return { Search: () => { useEffect(() => { searchMounts.count += 1; }, []); return <section aria-label="Búsqueda">Search screen</section>; } };
+});
 vi.mock('../features/similarity', () => ({ Similarity: () => <section aria-label="Similitud">Similarity screen</section> }));
 
 describe('application workspace', () => {
+  it('keeps every view mounted so switching tabs neither reloads nor loses its state', () => {
+    searchMounts.count = 0;
+    render(<App />);
+    expect(searchMounts.count).toBe(1);
+    fireEvent.mouseDown(screen.getByRole('tab', { name: 'Búsqueda' }));
+    expect(screen.getByRole('region', { name: 'Búsqueda' })).toBeVisible();
+    fireEvent.mouseDown(screen.getByRole('tab', { name: 'Corpus' }));
+    expect(screen.getByText('Search screen')).not.toBeVisible();
+    fireEvent.mouseDown(screen.getByRole('tab', { name: 'Búsqueda' }));
+    expect(searchMounts.count).toBe(1);
+  });
   it('preserves accessible branding, main landmark and no-analysis honesty', () => {
     render(<App />);
     expect(screen.getByRole('heading', { level: 1, name: 'Neguentropía' })).toBeVisible();

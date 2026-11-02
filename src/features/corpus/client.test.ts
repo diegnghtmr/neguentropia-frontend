@@ -1,11 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AxiosAdapter } from 'axios';
 import { createApiClient, http } from '../../infrastructure/api/http';
-import { loadCatalog, loadDetail } from './client';
+import { forgetPapers, loadCatalog, loadDetail } from './client';
 import { syntheticCatalog, syntheticDetail } from './fixtures.test-support';
 
 const originalAdapter = http.defaults.adapter;
 afterEach(() => {
+  forgetPapers();
   if (originalAdapter === undefined) delete http.defaults.adapter;
   else http.defaults.adapter = originalAdapter;
 });
@@ -25,12 +26,31 @@ describe('corpus HTTP client', () => {
     respond({ ...syntheticCatalog(), papers: [] });
     await expect(loadCatalog()).rejects.toThrow();
   });
-  it('preserves catalog order and forwards cancellation', async () => {
+  it('requests the catalog once and reuses it for every view', async () => {
     const adapter = respond(syntheticCatalog());
-    const signal = new AbortController().signal;
-    expect(await loadCatalog(signal)).toEqual(syntheticCatalog());
+    const [first, second] = await Promise.all([loadCatalog(), loadCatalog()]);
+    expect(first).toEqual(syntheticCatalog());
+    expect(await loadCatalog()).toBe(first);
+    expect(second).toBe(first);
+    expect(adapter).toHaveBeenCalledTimes(1);
     expect(adapter.mock.calls[0]![0].url).toBe('/papers');
+  });
+  it('requests the catalog again after a failed attempt', async () => {
+    const adapter = vi.fn<AxiosAdapter>()
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockImplementation(async (config) => ({ data: syntheticCatalog(), status: 200, statusText: 'OK', headers: {}, config }));
+    http.defaults.adapter = adapter;
+    await expect(loadCatalog()).rejects.toThrow('offline');
+    expect(await loadCatalog()).toEqual(syntheticCatalog());
+    expect(adapter).toHaveBeenCalledTimes(2);
+  });
+  it('downloads each abstract once and keeps forwarding cancellation', async () => {
+    const adapter = respond(syntheticDetail('synthetic-1'));
+    const signal = new AbortController().signal;
+    const first = await loadDetail('synthetic-1', signal);
     expect(adapter.mock.calls[0]![0].signal).toBe(signal);
+    expect(await loadDetail('synthetic-1')).toBe(first);
+    expect(adapter).toHaveBeenCalledTimes(1);
   });
   it('encodes opaque IDs as a single path segment', async () => {
     const adapter = respond(syntheticDetail('opaque/id ?'));

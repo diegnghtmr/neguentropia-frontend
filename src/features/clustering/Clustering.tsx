@@ -55,7 +55,7 @@ export function Clustering() {
   const active = useRef<AbortController | null>(null);
   useEffect(() => {
     const controller = new AbortController();
-    loadCatalog(controller.signal).then(
+    loadCatalog().then(
       (data) => {
         if (!controller.signal.aborted) {
           setPapers(data.papers);

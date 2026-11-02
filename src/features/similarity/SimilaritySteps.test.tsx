@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { AxiosError, type AxiosAdapter } from 'axios';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { forgetPapers } from '../corpus/client';
 import { http } from '../../infrastructure/api/http';
 import { Similarity } from './Similarity';
 import { loadSimilaritySteps } from './client';
@@ -20,6 +21,7 @@ beforeEach(() => {
     : post(config);
 });
 afterEach(() => {
+  forgetPapers();
   if (originalAdapter === undefined) delete http.defaults.adapter;
   else http.defaults.adapter = originalAdapter;
 });

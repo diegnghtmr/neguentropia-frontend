@@ -140,11 +140,12 @@ describe('Corpus screen', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: syntheticDetail('synthetic-2').title })).toBeVisible();
   });
-  it('aborts in-flight catalog on unmount', () => {
-    catalogRequest.mockReturnValue(new Promise(() => {}));
+  it('ignores a catalog that arrives after unmount', async () => {
+    let resolve: (value: ReturnType<typeof syntheticCatalog>) => void = () => {};
+    catalogRequest.mockReturnValue(new Promise((done) => { resolve = done; }));
     const view = render(<Corpus />);
-    const signal = catalogRequest.mock.calls[0]![0];
     view.unmount();
-    expect(signal?.aborted).toBe(true);
+    await act(async () => { resolve(syntheticCatalog()); });
+    expect(catalogRequest).toHaveBeenCalledTimes(1);
   });
 });

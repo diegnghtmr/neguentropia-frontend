@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { AxiosError, type AxiosAdapter } from 'axios';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { forgetPapers } from '../corpus/client';
 import { http } from '../../infrastructure/api/http';
 import { readFileSync } from 'node:fs';
 import { Clustering } from './Clustering';
@@ -23,6 +24,7 @@ beforeEach(() => {
   };
 });
 afterEach(() => {
+  forgetPapers();
   if (originalAdapter === undefined) delete http.defaults.adapter;
   else http.defaults.adapter = originalAdapter;
 });

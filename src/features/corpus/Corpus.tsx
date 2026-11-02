@@ -33,7 +33,7 @@ export function Corpus() {
   const [selectedId, setSelectedId] = useState('');
   useEffect(() => {
     const controller = new AbortController();
-    loadCatalog(controller.signal).then(
+    loadCatalog().then(
       (data) => { if (!controller.signal.aborted) setCatalog({ state: 'ready', data }); },
       (error: unknown) => { if (!controller.signal.aborted) setCatalog({ state: 'error', message: errorMessage(error, 'el corpus') }); },
     );

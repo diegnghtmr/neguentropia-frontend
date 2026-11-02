@@ -30,7 +30,7 @@ export function Similarity() {
   const active = useRef<AbortController | null>(null);
   useEffect(() => {
     const controller = new AbortController();
-    loadCatalog(controller.signal).then(
+    loadCatalog().then(
       (data) => { if (!controller.signal.aborted) setCatalog({ status: 'ready', papers: data.papers }); },
       (error: unknown) => { if (!controller.signal.aborted) setCatalog({ status: 'error', message: errorMessage(error) }); },
     );
@@ -46,7 +46,8 @@ export function Similarity() {
     clearResult();
     setSelectedIds(catalog.papers.filter((paper) => ids.includes(paper.id)).map((paper) => paper.id));
   }
-  const allSelected = catalog.status === 'ready' && selectedIds.length === catalog.papers.length;
+  const papers = catalog.status === 'ready' ? catalog.papers : [];
+  const allSelected = papers.length > 0 && selectedIds.length === papers.length;
   async function run() {
     if (active.current || catalog.status !== 'ready') return;
     const controller = new AbortController();
@@ -72,22 +73,22 @@ export function Similarity() {
     <div className="corpus-layout">
       <Card variant="blue" className="corpus-catalog similarity-controls">
         <div className="corpus-selection similarity-papers-field">
-          {catalog.status === 'loading' && <PapersSkeleton />}
           {catalog.status === 'error' && <Feedback message={catalog.message} />}
-          {catalog.status === 'ready' && <>
+          {catalog.status !== 'error' && <>
             <MultiSelect
               label="Artículos"
-              options={catalog.papers.map((paper) => ({ value: paper.id, label: `${paper.id} ${paper.title}`, tokenLabel: paper.id }))}
+              options={papers.map((paper) => ({ value: paper.id, label: `${paper.id} ${paper.title}`, tokenLabel: paper.id }))}
               adornment="none"
               value={selectedIds}
               onValueChange={chooseIds}
+              disabled={catalog.status === 'loading'}
               placeholder="Elige dos o más"
               searchPlaceholder="Buscar por título o id"
               emptyMessage="No hay artículos disponibles"
               noResultsMessage="No hay artículos que coincidan"
             />
-            <Button type="button" variant="ghost" size="sm" onClick={() => chooseIds(allSelected ? [] : catalog.papers.map((paper) => paper.id))}>
-              {allSelected ? 'Quitar todos' : `Seleccionar los ${catalog.papers.length}`}
+            <Button type="button" variant="ghost" size="sm" disabled={catalog.status === 'loading'} onClick={() => chooseIds(allSelected ? [] : papers.map((paper) => paper.id))}>
+              {allSelected ? 'Quitar todos' : 'Seleccionar los 20'}
             </Button>
           </>}
         </div>
@@ -112,13 +113,6 @@ export function Similarity() {
       </div>
     </div>
   </section>;
-}
-function PapersSkeleton() {
-  return <SkeletonGroup role="status" aria-label="Cargando los artículos" aria-busy="true">
-    <Skeleton variant="line" style={{ width: '5rem' }} />
-    <Skeleton variant="pill" style={{ height: 'var(--ctl-lg)' }} />
-    <Skeleton variant="line" style={{ width: '9rem' }} />
-  </SkeletonGroup>;
 }
 function ResultsSkeleton() {
   return <SkeletonGroup role="status" aria-label="Calculando la similitud" aria-busy="true" className="skeleton-view">

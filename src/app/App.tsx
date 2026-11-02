@@ -31,16 +31,16 @@ export default function App() {
             <Corpus />
           </TabsContent>
           <TabsContent value="ranking" forceMount hidden={view !== 'ranking'}>
-            {view === 'ranking' && <Ranking />}
+            <Ranking />
           </TabsContent>
           <TabsContent value="similarity" forceMount hidden={view !== 'similarity'}>
-            {view === 'similarity' && <Similarity />}
+            <Similarity />
           </TabsContent>
           <TabsContent value="clustering" forceMount hidden={view !== 'clustering'}>
-            {view === 'clustering' && <Clustering />}
+            <Clustering />
           </TabsContent>
           <TabsContent value="search" forceMount hidden={view !== 'search'}>
-            {view === 'search' && <Search />}
+            <Search />
           </TabsContent>
         </Tabs>
       </main>

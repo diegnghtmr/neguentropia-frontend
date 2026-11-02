@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { AxiosError, type AxiosAdapter } from 'axios';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { forgetPapers } from '../corpus/client';
 import { http } from '../../infrastructure/api/http';
 import { Similarity } from './Similarity';
 import { catalogFixture, geminiSimilarityFixture, localSimilarityFixture, similarityFixture } from './fixtures.test-support';
@@ -14,6 +15,7 @@ beforeEach(() => {
     : post(config);
 });
 afterEach(() => {
+  forgetPapers();
   if (originalAdapter === undefined) delete http.defaults.adapter;
   else http.defaults.adapter = originalAdapter;
 });
@@ -37,11 +39,12 @@ async function pickPapers(...numbers: number[]) {
 const selectPair = () => pickPapers(2, 1);
 const selected = () => screen.queryByRole('list', { name: 'Artículos seleccionados' });
 describe('Similarity screen', () => {
-  it('shows a text-free skeleton while the paper list loads', () => {
+  it('shows the paper field and the select-all button disabled while the paper list loads', () => {
     render(<Similarity />);
-    const loading = screen.getByRole('status', { name: 'Cargando los artículos' });
-    expect(loading.querySelector('[data-slot="skeleton-item"]')).not.toBeNull();
-    expect(loading.textContent).toBe('');
+    expect(screen.getByRole('button', { name: 'Artículos' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Artículos' })).toHaveTextContent('Elige dos o más');
+    expect(screen.getByRole('button', { name: 'Seleccionar los 20' })).toBeDisabled();
+    expect(screen.queryByRole('status', { name: 'Cargando los artículos' })).not.toBeInTheDocument();
   });
   it('requires two papers and at least one method and sends manifest and requested order', async () => {
     render(<Similarity />);
