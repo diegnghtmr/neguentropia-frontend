@@ -142,4 +142,4 @@ No empty features, unused chart libraries or generic framework are created.
 
 ## Hosting
 
-`Dockerfile.vercel` is the Docker path adopted for Vercel Container Runtime Beta, reused locally. The port configured in the provider must match Nginx.
+`Dockerfile.vercel` is the Docker path adopted for Vercel Container Runtime Beta, reused locally. Nginx listens on `PORT` (80 by default). Vercel does not pass project variables to the image build, so `VITE_API_BASE_URL` defaults to the public backend, `https://neguentropia-backend.onrender.com`; local builds override it with `--build-arg`. The backend must list the frontend origin in `CORS_ALLOWED_ORIGINS`.
