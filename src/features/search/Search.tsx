@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import axios from 'axios';
-import { z } from 'zod';
 import { loadCatalog, loadDetail } from '../corpus/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Badge } from '@/shared/ui/badge';
@@ -13,30 +11,16 @@ import { Skeleton, SkeletonGroup } from '@/shared/ui/skeleton';
 import { TableContainer, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCaption } from '@/shared/ui/table';
 import { searchPapers } from './client';
 import { highlightSegments } from './highlight';
-import { apiErrorSchema, searchMethods, type SearchMethod, type SearchResponse } from './schemas';
+import { errorMessage } from './errors';
+import { SearchStepsPanel } from './SearchSteps';
+import { searchMethods, type SearchMethod, type SearchResponse } from './schemas';
 
 type Papers = Awaited<ReturnType<typeof loadCatalog>>['papers'];
 type Match = { paperId: string; positions: number[]; abstract: string };
 type Loaded = { data: SearchResponse; matches: Match[] };
 type State = { status: 'idle' | 'loading' } | { status: 'ready'; loaded: Loaded } | { status: 'error'; message: string };
 const methodLabels: Record<SearchMethod, string> = { kmp: 'KMP', 'boyer-moore': 'Boyer-Moore', 'rabin-karp': 'Rabin-Karp' };
-const apiMessages = {
-  INVALID_INPUT: 'El patrón no es válido. Escribe un texto y vuelve a intentarlo.',
-  CORPUS_UNAVAILABLE: 'El corpus no está disponible. No se puede buscar.',
-  INTERNAL_ERROR: 'El servidor tuvo un error al buscar. Inténtalo de nuevo más tarde.',
-};
-function errorMessage(error: unknown) {
-  if (error instanceof z.ZodError) {
-    return 'El backend devolvió una respuesta de búsqueda no válida.';
-  }
-  if (axios.isAxiosError<unknown>(error)) {
-    const parsed = apiErrorSchema.safeParse(error.response?.data);
-    if (parsed.success) {
-      return apiMessages[parsed.data.code];
-    }
-  }
-  return 'No se pudo ejecutar la búsqueda. Revisa la conexión y la configuración del backend.';
-}
+const searchFallback = 'No se pudo ejecutar la búsqueda. Revisa la conexión y la configuración del backend.';
 function countLabel(count: number) {
   if (count === 1) {
     return '1 coincidencia';
@@ -98,7 +82,7 @@ export function Search() {
       }
     } catch (error: unknown) {
       if (!controller.signal.aborted) {
-        setState({ status: 'error', message: errorMessage(error) });
+        setState({ status: 'error', message: errorMessage(error, searchFallback) });
       }
     } finally {
       if (active.current === controller) {
@@ -193,6 +177,7 @@ function SearchResults({ loaded, papers }: { loaded: Loaded; papers: Papers }) {
           }
           return segment.text;
         })}</p>
+        <SearchStepsPanel pattern={data.pattern} paperId={match.paperId} />
       </CardContent>
     </Card>)}
   </div>;

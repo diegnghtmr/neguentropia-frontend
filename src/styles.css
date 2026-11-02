@@ -85,6 +85,14 @@ body { min-width: 20rem; }
 }
 .corpus-intro p { font-size: var(--fs-body); }
 .search-timings caption { text-align: left; white-space: normal; width: 0; min-width: 100%; }
+.search-steps { display: grid; justify-items: start; gap: var(--s-4); margin-top: var(--s-4); min-width: 0; width: 100%; }
+.search-steps-body, .search-step-section { display: grid; gap: var(--s-4); min-width: 0; width: 100%; }
+.search-step-section h4 { font-weight: var(--fw-semibold); font-size: var(--fs-body); }
+.search-fragment { background: var(--v-beige); padding: var(--s-3) var(--s-4); border-radius: var(--r-md); }
+.search-steps-scroll { max-height: 24rem; overflow-y: auto; }
+.search-constants { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-6); padding: 0; list-style: none; font-variant-numeric: tabular-nums; }
+.search-step { display: grid; gap: var(--s-2); min-width: 0; }
+.search-alignment { margin: 0; padding: var(--s-3) var(--s-4); overflow-x: auto; border-radius: var(--r-md); background: var(--v-beige); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: var(--fs-small); line-height: 1.5; }
 mark { background: var(--v-yellow); color: var(--v-on-accent); font-weight: var(--fw-semibold); padding-inline: .2em; border-radius: var(--r-xs); box-shadow: 0 0 0 1px var(--v-yellow-deep); }
 .dendrogram-scroll { overflow-x: auto; }
 .silhouette-legend { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); padding: 0; list-style: none; }

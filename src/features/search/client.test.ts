@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AxiosAdapter } from 'axios';
 import { http } from '../../infrastructure/api/http';
-import { searchPapers } from './client';
-import { searchFixture } from './fixtures.test-support';
+import { loadSearchSteps, searchPapers } from './client';
+import { searchFixture, stepsFixture } from './fixtures.test-support';
 
 const originalAdapter = http.defaults.adapter;
 afterEach(() => {
@@ -26,5 +26,15 @@ describe('search HTTP client', () => {
   it('rejects an incompatible response', async () => {
     respond({ ...searchFixture(), extra: true });
     await expect(searchPapers({ pattern: 'aba', methods: ['kmp'] })).rejects.toThrow();
+  });
+  it('posts the pattern and the paper id to the steps endpoint and forwards cancellation', async () => {
+    const adapter = respond(stepsFixture());
+    const signal = new AbortController().signal;
+    expect(await loadSearchSteps({ pattern: 'aba', paperId: 'paper-2' }, signal)).toEqual(stepsFixture());
+    expect(adapter.mock.calls[0]![0]).toMatchObject({ url: '/search/steps', method: 'post', data: JSON.stringify({ pattern: 'aba', paperId: 'paper-2' }), signal });
+  });
+  it('rejects an incompatible steps response', async () => {
+    respond({ ...stepsFixture(), extra: true });
+    await expect(loadSearchSteps({ pattern: 'aba', paperId: 'paper-2' })).rejects.toThrow();
   });
 });
